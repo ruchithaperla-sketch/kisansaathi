@@ -1,0 +1,286 @@
+[
+  {
+    "state": "Andhra Pradesh",
+    "crop": "Rice",
+    "pricePerQtl": 2800,
+    "market": "Visakhapatnam"
+  },
+  {
+    "state": "Andhra Pradesh",
+    "crop": "Groundnut",
+    "pricePerQtl": 5600,
+    "market": "Anantapur"
+  },
+  {
+    "state": "Andhra Pradesh",
+    "crop": "Chilli",
+    "pricePerQtl": 12500,
+    "market": "Guntur"
+  },
+
+  {
+    "state": "Telangana",
+    "crop": "Cotton",
+    "pricePerQtl": 6700,
+    "market": "Warangal"
+  },
+  {
+    "state": "Telangana",
+    "crop": "Maize",
+    "pricePerQtl": 2100,
+    "market": "Karimnagar"
+  },
+  {
+    "state": "Telangana",
+    "crop": "Turmeric",
+    "pricePerQtl": 9500,
+    "market": "Nizamabad"
+  },
+
+  {
+    "state": "Maharashtra",
+    "crop": "Soybean",
+    "pricePerQtl": 4800,
+    "market": "Nagpur"
+  },
+  {
+    "state": "Maharashtra",
+    "crop": "Cotton",
+    "pricePerQtl": 6500,
+    "market": "Akola"
+  },
+  {
+    "state": "Maharashtra",
+    "crop": "Onion",
+    "pricePerQtl": 1600,
+    "market": "Nashik"
+  },
+
+  {
+    "state": "Punjab",
+    "crop": "Wheat",
+    "pricePerQtl": 2425,
+    "market": "Ludhiana"
+  },
+  {
+    "state": "Punjab",
+    "crop": "Rice",
+    "pricePerQtl": 3100,
+    "market": "Amritsar"
+  },
+  {
+    "state": "Punjab",
+    "crop": "Maize",
+    "pricePerQtl": 2200,
+    "market": "Jalandhar"
+  },
+
+  {
+    "state": "Haryana",
+    "crop": "Wheat",
+    "pricePerQtl": 2400,
+    "market": "Karnal"
+  },
+  {
+    "state": "Haryana",
+    "crop": "Rice",
+    "pricePerQtl": 3000,
+    "market": "Panipat"
+  },
+  {
+    "state": "Haryana",
+    "crop": "Mustard",
+    "pricePerQtl": 5500,
+    "market": "Hisar"
+  },
+
+  {
+    "state": "Uttar Pradesh",
+    "crop": "Sugarcane",
+    "pricePerQtl": 360,
+    "market": "Meerut"
+  },
+  {
+    "state": "Uttar Pradesh",
+    "crop": "Wheat",
+    "pricePerQtl": 2350,
+    "market": "Lucknow"
+  },
+  {
+    "state": "Uttar Pradesh",
+    "crop": "Potato",
+    "pricePerQtl": 1200,
+    "market": "Agra"
+  },
+
+  {
+    "state": "Madhya Pradesh",
+    "crop": "Soybean",
+    "pricePerQtl": 5000,
+    "market": "Indore"
+  },
+  {
+    "state": "Madhya Pradesh",
+    "crop": "Wheat",
+    "pricePerQtl": 2380,
+    "market": "Bhopal"
+  },
+  {
+    "state": "Madhya Pradesh",
+    "crop": "Gram",
+    "pricePerQtl": 5600,
+    "market": "Jabalpur"
+  },
+
+  {
+    "state": "Rajasthan",
+    "crop": "Mustard",
+    "pricePerQtl": 5400,
+    "market": "Kota"
+  },
+  {
+    "state": "Rajasthan",
+    "crop": "Wheat",
+    "pricePerQtl": 2215,
+    "market": "Jaipur"
+  },
+  {
+    "state": "Rajasthan",
+    "crop": "Bajra",
+    "pricePerQtl": 2400,
+    "market": "Bikaner"
+  },
+
+  {
+    "state": "Gujarat",
+    "crop": "Groundnut",
+    "pricePerQtl": 6100,
+    "market": "Rajkot"
+  },
+  {
+    "state": "Gujarat",
+    "crop": "Cotton",
+    "pricePerQtl": 6800,
+    "market": "Ahmedabad"
+  },
+  {
+    "state": "Gujarat",
+    "crop": "Castor",
+    "pricePerQtl": 6200,
+    "market": "Mehsana"
+  },
+
+  {
+    "state": "Karnataka",
+    "crop": "Coffee",
+    "pricePerQtl": 9500,
+    "market": "Chikkamagaluru"
+  },
+  {
+    "state": "Karnataka",
+    "crop": "Maize",
+    "pricePerQtl": 2200,
+    "market": "Davanagere"
+  },
+  {
+    "state": "Karnataka",
+    "crop": "Ragi",
+    "pricePerQtl": 3300,
+    "market": "Mysuru"
+  },
+
+  {
+    "state": "Tamil Nadu",
+    "crop": "Rice",
+    "pricePerQtl": 2900,
+    "market": "Thanjavur"
+  },
+  {
+    "state": "Tamil Nadu",
+    "crop": "Banana",
+    "pricePerQtl": 3000,
+    "market": "Coimbatore"
+  },
+  {
+    "state": "Tamil Nadu",
+    "crop": "Sugarcane",
+    "pricePerQtl": 370,
+    "market": "Erode"
+  },
+
+  {
+    "state": "Kerala",
+    "crop": "Coconut",
+    "pricePerQtl": 12500,
+    "market": "Kochi"
+  },
+  {
+    "state": "Kerala",
+    "crop": "Pepper",
+    "pricePerQtl": 65000,
+    "market": "Idukki"
+  },
+  {
+    "state": "Kerala",
+    "crop": "Banana",
+    "pricePerQtl": 3200,
+    "market": "Thrissur"
+  },
+
+  {
+    "state": "Bihar",
+    "crop": "Maize",
+    "pricePerQtl": 2100,
+    "market": "Patna"
+  },
+  {
+    "state": "Bihar",
+    "crop": "Rice",
+    "pricePerQtl": 2750,
+    "market": "Muzaffarpur"
+  },
+  {
+    "state": "Bihar",
+    "crop": "Litchi",
+    "pricePerQtl": 8000,
+    "market": "Darbhanga"
+  },
+
+  {
+    "state": "West Bengal",
+    "crop": "Rice",
+    "pricePerQtl": 2850,
+    "market": "Kolkata"
+  },
+  {
+    "state": "West Bengal",
+    "crop": "Jute",
+    "pricePerQtl": 5200,
+    "market": "Howrah"
+  },
+  {
+    "state": "West Bengal",
+    "crop": "Potato",
+    "pricePerQtl": 1300,
+    "market": "Siliguri"
+  },
+
+  {
+    "state": "Odisha",
+    "crop": "Rice",
+    "pricePerQtl": 2700,
+    "market": "Bhubaneswar"
+  },
+  {
+    "state": "Odisha",
+    "crop": "Groundnut",
+    "pricePerQtl": 5700,
+    "market": "Cuttack"
+  },
+  {
+    "state": "Odisha",
+    "crop": "Turmeric",
+    "pricePerQtl": 9200,
+    "market": "Sambalpur"
+  }
+]
