@@ -1,365 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "./context/AuthContext";
 import { apiChat, apiAnalyzeImage } from "./utils/api";
 
  
 const API_KEY = ""; // handled by proxy
-const languageNativeName = {
-  English: "English",
-  Hindi: "Hindi (हिंदी)",
-  Telugu: "Telugu (తెలుగు)",
-  Tamil: "Tamil (தமிழ்)",
-  Kannada: "Kannada (ಕನ್ನಡ)",
-  Marathi: "Marathi (मराठी)",
-  Punjabi: "Punjabi (ਪੰਜਾਬੀ)",
-};
-
-
-const translations = {
-  English: {
-    appName: "KisanSaathi",
-    tagline: "Farmer Advisory Platform",
-    dashboard: "Dashboard", weather: "Weather", market: "Market",
-    crops: "Crops", disease: "Disease", schemes: "Schemes", advisor: "AI Advisor",
-    weatherTitle: "Live Weather by Location",
-    weatherPlaceholder: "Enter city, district or state e.g. Visakhapatnam",
-    searchBtn: "Search", loading: "Loading...",
-    marketTitle: "Mandi Prices Today",
-    cropTitle: "Crop Advisor",
-    cropPlaceholder: "e.g. Rice, Wheat, Tomato, Cotton...",
-    soilPlaceholder: "e.g. Black, Red, Loamy, Sandy, Clay...",
-    getAITips: "Get AI Farming Tips", gettingTips: "Getting AI Tips...",
-    diseaseTitle: "AI Disease Diagnosis",
-    diseaseDesc: "Upload a photo of your crop OR describe the symptoms below.",
-    analyzeBtn: "Diagnose Disease", analyzingBtn: "Analyzing...",
-    analyzePhotoBtn: "Analyze Photo",
-    chatPlaceholder: "Ask about crops, diseases, schemes...",
-    sendBtn: "Send",
-    schemesTitle: "Government Schemes",
-    eligible: "Eligible", notEligible: "Not Eligible",
-    applyNow: "Apply Now →",
-    selectLang: "Select Language",
-yieldTitle: "Yield & Profit Predictor",
-yieldSub: "Enter crop details → Get yield, revenue & profit estimate",
-predictBtn: "🌾 Predict Yield & Profit",
-predictingBtn: "Predicting...",
-soilAnalyzerTitle: "🪨 AI Soil Analyzer",
-analyzeSoilBtn: "🔬 Analyze Soil",
-analyzingSoilBtn: "Analyzing...",
-mandiSub: "Find nearest mandis and today's prices near you",
-locationLabel: "Your Location",
-findMandisBtn: "🗺️ Find Nearby Mandis",
-findingBtn: "Finding...",
-calculateBtn: "🧮 Calculate Requirements",
-calculatingBtn: "Calculating...",
-todayOverview: "Today's Overview",
-topSell: "🟢 Top 3 = Good time to sell",
-tempLabel: "Temperature", feelsLike: "Feels", moderate: "Moderate", liveData: "Live data",
-wheatPrice: "Wheat Price", updating: "Updating...", activeSchemes: "Active Schemes", youreEligible: "You're eligible",
-windSpeed: "Wind Speed", todayTasks: "Today's Farm Tasks", yourEligibleSchemes: "Your Eligible Schemes",
-quickActions: "Quick Actions", yieldTab: "Yield", soilTab: "Soil AI", mandiTab: "Mandis", seedTab: "Seeds",
-farmAlertLabel: "Farm Alert", forecastLabel: "7-Day Forecast", mandiPriceSub: "AI-powered daily mandi prices · Select your state and refresh anytime",
-marketTip: "Market Tip", priceChangeIn: "Crops ranked by today's price change in", poweredBy: "Powered by Claude · Ask in any language",
-onlineStatus: "Online", addTask: "+ Add", addTaskPlaceholder: "Add a new task...",
-cropCalendar: "📅 Crop Calendar", whatToDoThis: "What to do this", harvestPoll: "📊 Harvest Poll",
-harvestQuestion: "How is your harvest this season?", welcomeMsg: "Your complete farming companion — weather, markets, crops, disease detection & government schemes in one place.",
-refresh: "🔄 Refresh", viewAll: "View All →",
-  },
-  Hindi: {
-    appName: "किसान साथी",
-    tagline: "किसान सलाह मंच",
-    dashboard: "डैशबोर्ड", weather: "मौसम", market: "बाज़ार",
-    crops: "फसलें", disease: "रोग", schemes: "योजनाएं", advisor: "AI सलाहकार",
-    weatherTitle: "स्थान के अनुसार मौसम",
-    weatherPlaceholder: "शहर, जिला या राज्य दर्ज करें जैसे दिल्ली",
-    searchBtn: "खोजें", loading: "लोड हो रहा है...",
-    marketTitle: "आज के मंडी भाव",
-    cropTitle: "फसल सलाहकार",
-    cropPlaceholder: "जैसे धान, गेहूं, टमाटर, कपास...",
-    soilPlaceholder: "जैसे काली, लाल, दोमट, रेतीली, चिकनी...",
-    getAITips: "AI फसल सुझाव पाएं", gettingTips: "AI सुझाव लोड हो रहे हैं...",
-    diseaseTitle: "AI रोग निदान",
-    diseaseDesc: "फसल की फोटो अपलोड करें या लक्षण लिखें।",
-    analyzeBtn: "रोग पहचानें", analyzingBtn: "विश्लेषण हो रहा है...",
-    analyzePhotoBtn: "फोटो विश्लेषण करें",
-    chatPlaceholder: "फसल, रोग, योजनाओं के बारे में पूछें...",
-    sendBtn: "भेजें",
-    schemesTitle: "सरकारी योजनाएं",
-    eligible: "पात्र", notEligible: "अपात्र",
-    applyNow: "अभी आवेदन करें →",
-    selectLang: "भाषा चुनें",
-yieldTitle: "उपज और लाभ अनुमान",
-yieldSub: "फसल विवरण दर्ज करें → उपज, आय और लाभ जानें",
-predictBtn: "🌾 उपज और लाभ का अनुमान लगाएं",
-predictingBtn: "अनुमान लगाया जा रहा है...",
-soilAnalyzerTitle: "🪨 AI मिट्टी विश्लेषक",
-analyzeSoilBtn: "🔬 मिट्टी का विश्लेषण करें",
-analyzingSoilBtn: "विश्लेषण हो रहा है...",
-mandiSub: "नजदीकी मंडियां और आज के भाव खोजें",
-locationLabel: "आपका स्थान",
-findMandisBtn: "🗺️ नजदीकी मंडियां खोजें",
-findingBtn: "खोजा जा रहा है...",
-calculateBtn: "🧮 आवश्यकताएं गणना करें",
-calculatingBtn: "गणना हो रही है...",
-todayOverview: "आज का सारांश",
-topSell: "🟢 शीर्ष 3 = बेचने का अच्छा समय",
-tempLabel: "तापमान", feelsLike: "महसूस", moderate: "मध्यम", liveData: "लाइव डेटा",
-wheatPrice: "गेहूं भाव", updating: "अपडेट हो रहा है...", activeSchemes: "सक्रिय योजनाएं", youreEligible: "आप पात्र हैं",
-windSpeed: "हवा की गति", todayTasks: "आज के खेती के कार्य", yourEligibleSchemes: "आपकी पात्र योजनाएं",
-quickActions: "त्वरित कार्रवाई", yieldTab: "उपज", soilTab: "मिट्टी AI", mandiTab: "मंडी", seedTab: "बीज",
-farmAlertLabel: "खेत चेतावनी", forecastLabel: "7-दिन का पूर्वानुमान", mandiPriceSub: "AI-संचालित दैनिक मंडी भाव · राज्य चुनें और ताज़ा करें",
-marketTip: "बाज़ार टिप", priceChangeIn: "आज के मूल्य परिवर्तन के अनुसार फसलें", poweredBy: "Claude द्वारा संचालित · किसी भी भाषा में पूछें",
-onlineStatus: "ऑनलाइन", addTask: "+ जोड़ें", addTaskPlaceholder: "नया काम जोड़ें...",
-cropCalendar: "📅 फसल कैलेंडर", whatToDoThis: "इस महीने क्या करें", harvestPoll: "📊 फसल सर्वेक्षण",
-harvestQuestion: "इस सीज़न आपकी फसल कैसी है?", welcomeMsg: "मौसम, बाज़ार, फसल, रोग निदान और सरकारी योजनाएं — सब एक जगह।",
-refresh: "🔄 ताज़ा करें", viewAll: "सभी देखें →",
-  },
-  Telugu: {
-    appName: "కిసాన్ సాథి",
-    tagline: "రైతు సలహా వేదిక",
-    dashboard: "డాష్‌బోర్డ్", weather: "వాతావరణం", market: "మార్కెట్",
-    crops: "పంటలు", disease: "వ్యాధులు", schemes: "పథకాలు", advisor: "AI సలహాదారు",
-    weatherTitle: "స్థానం ఆధారంగా వాతావరణం",
-    weatherPlaceholder: "నగరం లేదా జిల్లా పేరు నమోదు చేయండి",
-    searchBtn: "వెతకండి", loading: "లోడవుతోంది...",
-    marketTitle: "నేటి మండి ధరలు",
-    cropTitle: "పంట సలహాదారు",
-    cropPlaceholder: "ఉదా. వరి, గోధుమ, టమాటా, పత్తి...",
-    soilPlaceholder: "ఉదా. నల్లమట్టి, ఎర్రమట్టి, గరప...",
-    getAITips: "AI పంట చిట్కాలు పొందండి", gettingTips: "AI చిట్కాలు లోడవుతున్నాయి...",
-    diseaseTitle: "AI వ్యాధి నిర్ధారణ",
-    diseaseDesc: "పంట ఫోటో అప్‌లోడ్ చేయండి లేదా లక్షణాలు వివరించండి.",
-    analyzeBtn: "వ్యాధి గుర్తించండి", analyzingBtn: "విశ్లేషిస్తోంది...",
-    analyzePhotoBtn: "ఫోటో విశ్లేషించండి",
-    chatPlaceholder: "పంటలు, వ్యాధులు, పథకాల గురించి అడగండి...",
-    sendBtn: "పంపండి",
-    schemesTitle: "ప్రభుత్వ పథకాలు",
-    eligible: "అర్హులు", notEligible: "అనర్హులు",
-    applyNow: "ఇప్పుడు దరఖాస్తు చేయండి →",
-    selectLang: "భాష ఎంచుకోండి",
-yieldTitle: "దిగుబడి మరియు లాభం అంచనా",
-yieldSub: "పంట వివరాలు నమోదు చేయండి → దిగుబడి మరియు లాభం తెలుసుకోండి",
-predictBtn: "🌾 దిగుబడి అంచనా వేయండి",
-predictingBtn: "అంచనా వేస్తోంది...",
-soilAnalyzerTitle: "🪨 AI మట్టి విశ్లేషకుడు",
-analyzeSoilBtn: "🔬 మట్టి విశ్లేషించండి",
-analyzingSoilBtn: "విశ్లేషిస్తోంది...",
-mandiSub: "దగ్గరలోని మండులు మరియు నేటి ధరలు కనుగొనండి",
-locationLabel: "మీ స్థానం",
-findMandisBtn: "🗺️ దగ్గరి మండులు కనుగొనండి",
-findingBtn: "వెతుకుతోంది...",
-calculateBtn: "🧮 అవసరాలు లెక్కించండి",
-calculatingBtn: "లెక్కిస్తోంది...",
-todayOverview: "నేటి సారాంశం",
-topSell: "🟢 టాప్ 3 = అమ్మడానికి మంచి సమయం",
-tempLabel: "ఉష్ణోగ్రత", feelsLike: "అనిపించే", moderate: "మధ్యస్థంగా", liveData: "నేరుగా డేటా",
-wheatPrice: "గోధుమ ధర", updating: "నవీకరిస్తోంది...", activeSchemes: "చురుకైన పథకాలు", youreEligible: "మీరు అర్హులు",
-windSpeed: "గాలి వేగం", todayTasks: "నేటి వ్యవసాయ పనులు", yourEligibleSchemes: "మీ అర్హత పథకాలు",
-quickActions: "త్వరిత చర్యలు", yieldTab: "దిగుబడి", soilTab: "మట్టి AI", mandiTab: "మండి", seedTab: "విత్తనాలు",
-farmAlertLabel: "వ్యవసాయ హెచ్చరిక", forecastLabel: "7-రోజుల అంచనా", mandiPriceSub: "AI-ఆధారిత రోజువారీ మండి ధరలు · మీ రాష్ట్రం ఎంచుకోండి",
-marketTip: "మార్కెట్ చిట్కా", priceChangeIn: "నేటి ధర మార్పు ప్రకారం పంటలు", poweredBy: "Claude ద్వారా · ఏ భాషలోనైనా అడగండి",
-onlineStatus: "ఆన్‌లైన్", addTask: "+ జోడించు", addTaskPlaceholder: "కొత్త పని జోడించు...",
-cropCalendar: "📅 పంట క్యాలెండర్", whatToDoThis: "ఈ నెలలో ఏం చేయాలి", harvestPoll: "📊 దిగుబడి సర్వే",
-harvestQuestion: "ఈ సీజన్ మీ దిగుబడి ఎలా ఉంది?", welcomeMsg: "వాతావరణం, మార్కెట్లు, పంటలు, వ్యాధి నిర్ధారణ & ప్రభుత్వ పథకాలు అన్నీ ఒకే చోట.",
-refresh: "🔄 రిఫ్రెష్", viewAll: "అన్నీ చూడండి →",
-  },
-  Tamil: {
-    appName: "கிசான் சாதி",
-    tagline: "விவசாயி ஆலோசனை தளம்",
-    dashboard: "டாஷ்போர்டு", weather: "வானிலை", market: "சந்தை",
-    crops: "பயிர்கள்", disease: "நோய்கள்", schemes: "திட்டங்கள்", advisor: "AI ஆலோசகர்",
-    weatherTitle: "இடம் சார்ந்த வானிலை",
-    weatherPlaceholder: "நகரம் அல்லது மாவட்டம் உள்ளிடுக",
-    searchBtn: "தேடு", loading: "ஏற்றுகிறது...",
-    marketTitle: "இன்றைய சந்தை விலைகள்",
-    cropTitle: "பயிர் ஆலோசகர்",
-    cropPlaceholder: "எ.கா. நெல், கோதுமை, தக்காளி...",
-    soilPlaceholder: "எ.கா. கருப்பு, சிவப்பு, வண்டல்...",
-    getAITips: "AI பயிர் குறிப்புகள் பெறுக", gettingTips: "AI குறிப்புகள் ஏற்றுகின்றன...",
-    diseaseTitle: "AI நோய் கண்டறிதல்",
-    diseaseDesc: "பயிர் புகைப்படம் பதிவேற்றவும் அல்லது அறிகுறிகளை விவரிக்கவும்.",
-    analyzeBtn: "நோய் கண்டறி", analyzingBtn: "பகுப்பாய்வு...",
-    analyzePhotoBtn: "புகைப்படம் பகுப்பாய்வு",
-    chatPlaceholder: "பயிர்கள், நோய்கள் பற்றி கேளுங்கள்...",
-    sendBtn: "அனுப்பு",
-    schemesTitle: "அரசு திட்டங்கள்",
-    eligible: "தகுதியான", notEligible: "தகுதியற்ற",
-    applyNow: "இப்போது விண்ணப்பிக்கவும் →",
-    selectLang: "மொழி தேர்வு",
-yieldTitle: "விளைச்சல் மற்றும் லாப கணிப்பு",
-yieldSub: "பயிர் விவரங்கள் உள்ளிடுக → விளைச்சல் மற்றும் லாபம் அறிக",
-predictBtn: "🌾 விளைச்சல் கணிக்கவும்",
-predictingBtn: "கணிக்கிறது...",
-soilAnalyzerTitle: "🪨 AI மண் பகுப்பாய்வி",
-analyzeSoilBtn: "🔬 மண் பகுப்பாய்வு செய்க",
-analyzingSoilBtn: "பகுப்பாய்வு செய்கிறது...",
-mandiSub: "அருகிலுள்ள சந்தைகள் மற்றும் இன்றைய விலைகள் கண்டறியுங்கள்",
-locationLabel: "உங்கள் இடம்",
-findMandisBtn: "🗺️ அருகில் சந்தை கண்டறி",
-findingBtn: "தேடுகிறது...",
-calculateBtn: "🧮 தேவைகளை கணக்கிடுக",
-calculatingBtn: "கணக்கிடுகிறது...",
-todayOverview: "இன்றைய சுருக்கம்",
-topSell: "🟢 முதல் 3 = விற்க நல்ல நேரம்",
-tempLabel: "வெப்பநிலை", feelsLike: "உணர்வு", moderate: "மிதமான", liveData: "நேரடி தரவு",
-wheatPrice: "கோதுமை விலை", updating: "புதுப்பிக்கிறது...", activeSchemes: "செயலில் திட்டங்கள்", youreEligible: "நீங்கள் தகுதியானவர்",
-windSpeed: "காற்று வேகம்", todayTasks: "இன்றைய வேளாண் பணிகள்", yourEligibleSchemes: "உங்கள் தகுதி திட்டங்கள்",
-quickActions: "விரைவு நடவடிக்கைகள்", yieldTab: "விளைச்சல்", soilTab: "மண் AI", mandiTab: "சந்தை", seedTab: "விதைகள்",
-farmAlertLabel: "வேளாண் எச்சரிக்கை", forecastLabel: "7-நாள் முன்னறிவிப்பு", mandiPriceSub: "AI-இயங்கும் தினசரி சந்தை விலைகள் · உங்கள் மாநிலம் தேர்வு செய்யுங்கள்",
-marketTip: "சந்தை குறிப்பு", priceChangeIn: "இன்றைய விலை மாற்றத்தின் படி பயிர்கள்", poweredBy: "Claude மூலம் · எந்த மொழியிலும் கேளுங்கள்",
-onlineStatus: "நிகழ்நேரம்", addTask: "+ சேர்", addTaskPlaceholder: "புதிய பணி சேர்க்கவும்...",
-cropCalendar: "📅 பயிர் காலண்டர்", whatToDoThis: "இந்த மாதம் என்ன செய்வது", harvestPoll: "📊 அறுவடை கணக்கெடுப்பு",
-harvestQuestion: "இந்த சீசனில் உங்கள் அறுவடை எப்படி?", welcomeMsg: "வானிலை, சந்தைகள், பயிர்கள், நோய் கண்டறிதல் & அரசு திட்டங்கள் எல்லாம் ஒரே இடத்தில்.",
-refresh: "🔄 புதுப்பி", viewAll: "அனைத்தும் காண →",
-  },
-  Kannada: {
-    appName: "ಕಿಸಾನ್ ಸಾಥಿ",
-    tagline: "ರೈತ ಸಲಹಾ ವೇದಿಕೆ",
-    dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", weather: "ಹವಾಮಾನ", market: "ಮಾರುಕಟ್ಟೆ",
-    crops: "ಬೆಳೆಗಳು", disease: "ರೋಗಗಳು", schemes: "ಯೋಜನೆಗಳು", advisor: "AI ಸಲಹೆಗಾರ",
-    weatherTitle: "ಸ್ಥಳ ಆಧಾರಿತ ಹವಾಮಾನ",
-    weatherPlaceholder: "ನಗರ ಅಥವಾ ಜಿಲ್ಲೆಯ ಹೆಸರು ನಮೂದಿಸಿ",
-    searchBtn: "ಹುಡುಕಿ", loading: "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
-    marketTitle: "ಇಂದಿನ ಮಂಡಿ ಬೆಲೆಗಳು",
-    cropTitle: "ಬೆಳೆ ಸಲಹೆಗಾರ",
-    cropPlaceholder: "ಉದಾ. ಭತ್ತ, ಗೋಧಿ, ಟೊಮೇಟೊ...",
-    soilPlaceholder: "ಉದಾ. ಕಪ್ಪು, ಕೆಂಪು, ಮೆಕ್ಕಲು...",
-    getAITips: "AI ಬೆಳೆ ಸಲಹೆ ಪಡೆಯಿರಿ", gettingTips: "AI ಸಲಹೆ ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
-    diseaseTitle: "AI ರೋಗ ಪತ್ತೆ",
-    diseaseDesc: "ಬೆಳೆ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ.",
-    analyzeBtn: "ರೋಗ ಗುರುತಿಸಿ", analyzingBtn: "ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
-    analyzePhotoBtn: "ಫೋಟೋ ವಿಶ್ಲೇಷಿಸಿ",
-    chatPlaceholder: "ಬೆಳೆಗಳು, ರೋಗಗಳ ಬಗ್ಗೆ ಕೇಳಿ...",
-    sendBtn: "ಕಳುಹಿಸಿ",
-    schemesTitle: "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು",
-    eligible: "ಅರ್ಹ", notEligible: "ಅನರ್ಹ",
-    applyNow: "ಈಗ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ →",
-    selectLang: "ಭಾಷೆ ಆಯ್ಕೆ",
-yieldTitle: "ಇಳುವರಿ ಮತ್ತು ಲಾಭ ಅಂದಾಜು",
-yieldSub: "ಬೆಳೆ ವಿವರ ನಮೂದಿಸಿ → ಇಳುವರಿ ಮತ್ತು ಲಾಭ ತಿಳಿಯಿರಿ",
-predictBtn: "🌾 ಇಳುವರಿ ಅಂದಾಜು ಮಾಡಿ",
-predictingBtn: "ಅಂದಾಜು ಮಾಡಲಾಗುತ್ತಿದೆ...",
-soilAnalyzerTitle: "🪨 AI ಮಣ್ಣು ವಿಶ್ಲೇಷಕ",
-analyzeSoilBtn: "🔬 ಮಣ್ಣು ವಿಶ್ಲೇಷಿಸಿ",
-analyzingSoilBtn: "ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
-mandiSub: "ಹತ್ತಿರದ ಮಂಡಿಗಳು ಮತ್ತು ಇಂದಿನ ಬೆಲೆಗಳು ಹುಡುಕಿ",
-locationLabel: "ನಿಮ್ಮ ಸ್ಥಳ",
-findMandisBtn: "🗺️ ಹತ್ತಿರದ ಮಂಡಿ ಹುಡುಕಿ",
-findingBtn: "ಹುಡುಕಲಾಗುತ್ತಿದೆ...",
-calculateBtn: "🧮 ಅವಶ್ಯಕತೆಗಳು ಲೆಕ್ಕಿಸಿ",
-calculatingBtn: "ಲೆಕ್ಕಿಸಲಾಗುತ್ತಿದೆ...",
-todayOverview: "ಇಂದಿನ ಸಾರಾಂಶ",
-topSell: "🟢 ಟಾಪ್ 3 = ಮಾರಾಟಕ್ಕೆ ಉತ್ತಮ ಸಮಯ",
-tempLabel: "ತಾಪಮಾನ", feelsLike: "ಅನಿಸಿಕೆ", moderate: "ಮಧ್ಯಮ", liveData: "ನೇರ ಡೇಟಾ",
-wheatPrice: "ಗೋಧಿ ಬೆಲೆ", updating: "ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ...", activeSchemes: "ಸಕ್ರಿಯ ಯೋಜನೆಗಳು", youreEligible: "ನೀವು ಅರ್ಹರು",
-windSpeed: "ಗಾಳಿ ವೇಗ", todayTasks: "ಇಂದಿನ ಕೃಷಿ ಕಾರ್ಯಗಳು", yourEligibleSchemes: "ನಿಮ್ಮ ಅರ್ಹ ಯೋಜನೆಗಳು",
-quickActions: "ತ್ವರಿತ ಕ್ರಮಗಳು", yieldTab: "ಇಳುವರಿ", soilTab: "ಮಣ್ಣು AI", mandiTab: "ಮಂಡಿ", seedTab: "ಬೀಜಗಳು",
-farmAlertLabel: "ಕೃಷಿ ಎಚ್ಚರಿಕೆ", forecastLabel: "7-ದಿನದ ಮುನ್ಸೂಚನೆ", mandiPriceSub: "AI-ಆಧಾರಿತ ದೈನಂದಿನ ಮಂಡಿ ಬೆಲೆಗಳು · ನಿಮ್ಮ ರಾಜ್ಯ ಆಯ್ಕೆ ಮಾಡಿ",
-marketTip: "ಮಾರುಕಟ್ಟೆ ಸಲಹೆ", priceChangeIn: "ಇಂದಿನ ಬೆಲೆ ಬದಲಾವಣೆಯ ಪ್ರಕಾರ ಬೆಳೆಗಳು", poweredBy: "Claude ಮೂಲಕ · ಯಾವ ಭಾಷೆಯಲ್ಲಿ ಬೇಕಾದರೂ ಕೇಳಿ",
-onlineStatus: "ಆನ್‌ಲೈನ್", addTask: "+ ಸೇರಿಸು", addTaskPlaceholder: "ಹೊಸ ಕೆಲಸ ಸೇರಿಸಿ...",
-cropCalendar: "📅 ಬೆಳೆ ಕ್ಯಾಲೆಂಡರ್", whatToDoThis: "ಈ ತಿಂಗಳು ಏನು ಮಾಡಬೇಕು", harvestPoll: "📊 ಇಳುವರಿ ಸಮೀಕ್ಷೆ",
-harvestQuestion: "ಈ ಋತುವಿನಲ್ಲಿ ನಿಮ್ಮ ಇಳುವರಿ ಹೇಗಿದೆ?", welcomeMsg: "ಹವಾಮಾನ, ಮಾರುಕಟ್ಟೆ, ಬೆಳೆಗಳು, ರೋಗ ಪತ್ತೆ & ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು ಎಲ್ಲವೂ ಒಂದೇ ಕಡೆ.",
-refresh: "🔄 ರಿಫ್ರೆಶ್", viewAll: "ಎಲ್ಲ ನೋಡಿ →",
-  },
-  Marathi: {
-    appName: "किसान साथी",
-    tagline: "शेतकरी सल्ला मंच",
-    dashboard: "डॅशबोर्ड", weather: "हवामान", market: "बाजार",
-    crops: "पिके", disease: "रोग", schemes: "योजना", advisor: "AI सल्लागार",
-    weatherTitle: "स्थानानुसार हवामान",
-    weatherPlaceholder: "शहर किंवा जिल्हा प्रविष्ट करा",
-    searchBtn: "शोधा", loading: "लोड होत आहे...",
-    marketTitle: "आजचे बाजार भाव",
-    cropTitle: "पीक सल्लागार",
-    cropPlaceholder: "उदा. भात, गहू, टोमॅटो, कापूस...",
-    soilPlaceholder: "उदा. काळी, लाल, गाळाची, वालुकामय...",
-    getAITips: "AI पीक सल्ला मिळवा", gettingTips: "AI सल्ला लोड होत आहे...",
-    diseaseTitle: "AI रोग निदान",
-    diseaseDesc: "पिकाचा फोटो अपलोड करा किंवा लक्षणे सांगा.",
-    analyzeBtn: "रोग ओळखा", analyzingBtn: "विश्लेषण होत आहे...",
-    analyzePhotoBtn: "फोटो विश्लेषण करा",
-    chatPlaceholder: "पिके, रोग, योजनांबद्दल विचारा...",
-    sendBtn: "पाठवा",
-    schemesTitle: "सरकारी योजना",
-    eligible: "पात्र", notEligible: "अपात्र",
-    applyNow: "आता अर्ज करा →",
-    selectLang: "भाषा निवडा",
-yieldTitle: "उत्पादन आणि नफा अंदाज",
-yieldSub: "पीक तपशील प्रविष्ट करा → उत्पादन आणि नफा जाणून घ्या",
-predictBtn: "🌾 उत्पादन अंदाज करा",
-predictingBtn: "अंदाज होत आहे...",
-soilAnalyzerTitle: "🪨 AI माती विश्लेषक",
-analyzeSoilBtn: "🔬 माती विश्लेषण करा",
-analyzingSoilBtn: "विश्लेषण होत आहे...",
-mandiSub: "जवळच्या मंड्या आणि आजचे भाव शोधा",
-locationLabel: "तुमचे स्थान",
-findMandisBtn: "🗺️ जवळच्या मंड्या शोधा",
-findingBtn: "शोधत आहे...",
-calculateBtn: "🧮 आवश्यकता मोजा",
-calculatingBtn: "मोजत आहे...",
-todayOverview: "आजचा आढावा",
-topSell: "🟢 टॉप 3 = विकण्यासाठी चांगला वेळ",
-tempLabel: "तापमान", feelsLike: "जाणवते", moderate: "मध्यम", liveData: "थेट माहिती",
-wheatPrice: "गहू भाव", updating: "अपडेट होत आहे...", activeSchemes: "सक्रिय योजना", youreEligible: "तुम्ही पात्र आहात",
-windSpeed: "वाऱ्याचा वेग", todayTasks: "आजची शेती कामे", yourEligibleSchemes: "तुमच्या पात्र योजना",
-quickActions: "त्वरित कृती", yieldTab: "उत्पादन", soilTab: "माती AI", mandiTab: "मंडी", seedTab: "बियाणे",
-farmAlertLabel: "शेती इशारा", forecastLabel: "7-दिवसांचा अंदाज", mandiPriceSub: "AI-चालित दैनिक मंडी भाव · तुमचे राज्य निवडा",
-marketTip: "बाजार टिप", priceChangeIn: "आजच्या किंमत बदलानुसार पिके", poweredBy: "Claude द्वारे · कोणत्याही भाषेत विचारा",
-onlineStatus: "ऑनलाइन", addTask: "+ जोडा", addTaskPlaceholder: "नवीन काम जोडा...",
-cropCalendar: "📅 पीक दिनदर्शिका", whatToDoThis: "या महिन्यात काय करावे", harvestPoll: "📊 कापणी सर्वेक्षण",
-harvestQuestion: "या हंगामात तुमची कापणी कशी आहे?", welcomeMsg: "हवामान, बाजार, पिके, रोग निदान आणि सरकारी योजना — सर्व एकाच ठिकाणी.",
-refresh: "🔄 रिफ्रेश", viewAll: "सर्व पहा →",
-  },
-  Punjabi: {
-    appName: "ਕਿਸਾਨ ਸਾਥੀ",
-    tagline: "ਕਿਸਾਨ ਸਲਾਹ ਮੰਚ",
-    dashboard: "ਡੈਸ਼ਬੋਰਡ", weather: "ਮੌਸਮ", market: "ਬਾਜ਼ਾਰ",
-    crops: "ਫ਼ਸਲਾਂ", disease: "ਰੋਗ", schemes: "ਯੋਜਨਾਵਾਂ", advisor: "AI ਸਲਾਹਕਾਰ",
-    weatherTitle: "ਸਥਾਨ ਅਨੁਸਾਰ ਮੌਸਮ",
-    weatherPlaceholder: "ਸ਼ਹਿਰ ਜਾਂ ਜ਼ਿਲ੍ਹਾ ਦਰਜ ਕਰੋ",
-    searchBtn: "ਖੋਜੋ", loading: "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
-    marketTitle: "ਅੱਜ ਦੇ ਮੰਡੀ ਭਾਅ",
-    cropTitle: "ਫ਼ਸਲ ਸਲਾਹਕਾਰ",
-    cropPlaceholder: "ਜਿਵੇਂ ਝੋਨਾ, ਕਣਕ, ਟਮਾਟਰ...",
-    soilPlaceholder: "ਜਿਵੇਂ ਕਾਲੀ, ਲਾਲ, ਦੋਮਟ...",
-    getAITips: "AI ਫ਼ਸਲ ਸੁਝਾਅ ਲਓ", gettingTips: "AI ਸੁਝਾਅ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...",
-    diseaseTitle: "AI ਰੋਗ ਨਿਦਾਨ",
-    diseaseDesc: "ਫ਼ਸਲ ਦੀ ਫ਼ੋਟੋ ਅਪਲੋਡ ਕਰੋ ਜਾਂ ਲੱਛਣ ਦੱਸੋ।",
-    analyzeBtn: "ਰੋਗ ਪਛਾਣੋ", analyzingBtn: "ਵਿਸ਼ਲੇਸ਼ਣ ਹੋ ਰਿਹਾ ਹੈ...",
-    analyzePhotoBtn: "ਫ਼ੋਟੋ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ",
-    chatPlaceholder: "ਫ਼ਸਲਾਂ, ਰੋਗਾਂ ਬਾਰੇ ਪੁੱਛੋ...",
-    sendBtn: "ਭੇਜੋ",
-    schemesTitle: "ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ",
-    eligible: "ਯੋਗ", notEligible: "ਅਯੋਗ",
-    applyNow: "ਹੁਣੇ ਅਰਜ਼ੀ ਦਿਓ →",
-    selectLang: "ਭਾਸ਼ਾ ਚੁਣੋ",
-yieldTitle: "ਝਾੜ ਅਤੇ ਮੁਨਾਫ਼ਾ ਅਨੁਮਾਨ",
-yieldSub: "ਫ਼ਸਲ ਵੇਰਵਾ ਦਰਜ ਕਰੋ → ਝਾੜ ਅਤੇ ਮੁਨਾਫ਼ਾ ਜਾਣੋ",
-predictBtn: "🌾 ਝਾੜ ਦਾ ਅਨੁਮਾਨ ਲਗਾਓ",
-predictingBtn: "ਅਨੁਮਾਨ ਲਗਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...",
-soilAnalyzerTitle: "🪨 AI ਮਿੱਟੀ ਵਿਸ਼ਲੇਸ਼ਕ",
-analyzeSoilBtn: "🔬 ਮਿੱਟੀ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ",
-analyzingSoilBtn: "ਵਿਸ਼ਲੇਸ਼ਣ ਹੋ ਰਿਹਾ ਹੈ...",
-mandiSub: "ਨਜ਼ਦੀਕੀ ਮੰਡੀਆਂ ਅਤੇ ਅੱਜ ਦੇ ਭਾਅ ਲੱਭੋ",
-locationLabel: "ਤੁਹਾਡਾ ਸਥਾਨ",
-findMandisBtn: "🗺️ ਨਜ਼ਦੀਕੀ ਮੰਡੀਆਂ ਲੱਭੋ",
-findingBtn: "ਲੱਭਿਆ ਜਾ ਰਿਹਾ ਹੈ...",
-calculateBtn: "🧮 ਲੋੜਾਂ ਹਿਸਾਬ ਕਰੋ",
-calculatingBtn: "ਹਿਸਾਬ ਹੋ ਰਿਹਾ ਹੈ...",
-todayOverview: "ਅੱਜ ਦਾ ਸੰਖੇਪ",
-topSell: "🟢 ਟਾਪ 3 = ਵੇਚਣ ਦਾ ਚੰਗਾ ਸਮਾਂ",
-tempLabel: "ਤਾਪਮਾਨ", feelsLike: "ਮਹਿਸੂਸ", moderate: "ਦਰਮਿਆਨਾ", liveData: "ਲਾਈਵ ਡੇਟਾ",
-wheatPrice: "ਕਣਕ ਭਾਅ", updating: "ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ...", activeSchemes: "ਸਰਗਰਮ ਯੋਜਨਾਵਾਂ", youreEligible: "ਤੁਸੀਂ ਯੋਗ ਹੋ",
-windSpeed: "ਹਵਾ ਦੀ ਗਤੀ", todayTasks: "ਅੱਜ ਦੇ ਖੇਤੀ ਕੰਮ", yourEligibleSchemes: "ਤੁਹਾਡੀਆਂ ਯੋਗ ਯੋਜਨਾਵਾਂ",
-quickActions: "ਤੁਰੰਤ ਕਾਰਵਾਈ", yieldTab: "ਝਾੜ", soilTab: "ਮਿੱਟੀ AI", mandiTab: "ਮੰਡੀ", seedTab: "ਬੀਜ",
-farmAlertLabel: "ਖੇਤ ਚੇਤਾਵਨੀ", forecastLabel: "7-ਦਿਨ ਦਾ ਅਨੁਮਾਨ", mandiPriceSub: "AI-ਸੰਚਾਲਿਤ ਰੋਜ਼ਾਨਾ ਮੰਡੀ ਭਾਅ · ਆਪਣਾ ਰਾਜ ਚੁਣੋ",
-marketTip: "ਬਾਜ਼ਾਰ ਟਿੱਪ", priceChangeIn: "ਅੱਜ ਦੇ ਭਾਅ ਬਦਲਾਅ ਅਨੁਸਾਰ ਫ਼ਸਲਾਂ", poweredBy: "Claude ਦੁਆਰਾ · ਕਿਸੇ ਵੀ ਭਾਸ਼ਾ ਵਿੱਚ ਪੁੱਛੋ",
-onlineStatus: "ਔਨਲਾਈਨ", addTask: "+ ਜੋੜੋ", addTaskPlaceholder: "ਨਵਾਂ ਕੰਮ ਜੋੜੋ...",
-cropCalendar: "📅 ਫ਼ਸਲ ਕੈਲੰਡਰ", whatToDoThis: "ਇਸ ਮਹੀਨੇ ਕੀ ਕਰਨਾ ਹੈ", harvestPoll: "📊 ਵਾਢੀ ਸਰਵੇਖਣ",
-harvestQuestion: "ਇਸ ਸੀਜ਼ਨ ਤੁਹਾਡੀ ਵਾਢੀ ਕਿਵੇਂ ਹੈ?", welcomeMsg: "ਮੌਸਮ, ਬਾਜ਼ਾਰ, ਫ਼ਸਲਾਂ, ਰੋਗ ਪਛਾਣ ਅਤੇ ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ — ਸਭ ਇੱਕ ਥਾਂ।",
-refresh: "🔄 ਰਿਫ੍ਰੈਸ਼", viewAll: "ਸਭ ਦੇਖੋ →",
-  },
-};
  
 // ── Palette & theme ──────────────────────────────────────────────
 const theme = {
@@ -444,6 +88,294 @@ const diseases = [
   { name: "Leaf Blight", symptoms: "Water-soaked lesions that turn brown, with yellow margins.", treatment: "Apply Mancozeb 75 WP @ 2.5 g/L. Avoid overhead irrigation.", severity: "Medium" },
 ];
  
+// ── Smart Farm Insights Helpers ──────────────────────────────────
+// Reads live weather (dashWeather from weatherapi.com) when available,
+// otherwise falls back to the local mock weatherData. Re-runs whenever
+// dashWeather changes so every derived card stays in sync automatically.
+function getFarmConditions(dashWeather, fallback) {
+  if (dashWeather && dashWeather.current) {
+    const heavyRain = (dashWeather.forecast?.forecastday || []).some(d => d.day.daily_chance_of_rain >= 70);
+    return {
+      temp: dashWeather.current.temp_c,
+      humidity: dashWeather.current.humidity,
+      wind: dashWeather.current.wind_kph,
+      heavyRain,
+    };
+  }
+  const heavyRain = fallback.forecast.some(f => f.rain >= 70);
+  return {
+    temp: fallback.current.temp,
+    humidity: fallback.current.humidity,
+    wind: fallback.current.wind,
+    heavyRain,
+  };
+}
+
+function computeCropHealth(
+  crop,
+  stage,
+  temp,
+  humidity,
+  heavyRain,
+  diseaseRisk
+) {
+  let score = 100;
+  let note = "Conditions are favorable for healthy crop growth.";
+
+  if (temp > 35) score -= 10;
+  if (humidity > 85) score -= 10;
+  if (heavyRain) score -= 10;
+
+  if (diseaseRisk === "HIGH") score -= 20;
+  else if (diseaseRisk === "MEDIUM") score -= 10;
+
+  // Crop specific
+
+  if (
+    crop === "Rice" &&
+    stage === "Flowering"
+  ) {
+    score -= 5;
+  }
+
+  if (
+    crop === "Wheat" &&
+    stage === "Flowering"
+  ) {
+    score -= 8;
+  }
+
+  if (
+    crop === "Cotton" &&
+    stage === "Boll Formation"
+  ) {
+    score -= 5;
+  }
+
+  score = Math.max(30, Math.min(100, score));
+
+  const status =
+    score >= 90
+      ? "Excellent"
+      : score >= 75
+      ? "Healthy"
+      : score >= 60
+      ? "Moderate"
+      : "Needs Attention";
+
+  return {
+    score,
+    status,
+    note
+  };
+}
+function computeDiseaseRisk(humidity, heavyRain) {
+  if (humidity > 85 && heavyRain) {
+    return { level: "HIGH", icon: "🔴", color: "#c0392b", bg: "#fce4ec", text: "High humidity and rainfall may increase fungal disease risk." };
+  }
+  if (humidity >= 70) {
+    return { level: "MEDIUM", icon: "🟡", color: "#f9a825", bg: "#fff8e1", text: "Moderate humidity — keep an eye out for early signs of disease." };
+  }
+  return { level: "LOW", icon: "🟢", color: "#2e7d32", bg: "#e8f5e9", text: "Current conditions are unfavorable for disease spread." };
+}
+
+function generateAdvisory(
+  crop,
+  currentStage,
+  diseaseRisk,
+  temp,
+  humidity,
+  wind,
+  heavyRain
+) {
+  const tips = [];
+
+  // Weather advice
+  if (heavyRain)
+    tips.push(
+      "❌ Avoid pesticide spraying — rain in the forecast will wash it off."
+    );
+
+  if (wind > 20)
+    tips.push(
+      "⚠️ Delay fertilizer application — strong winds will reduce effectiveness."
+    );
+
+  if (humidity < 40)
+    tips.push(
+      "💧 Irrigation recommended — low humidity may stress your crop."
+    );
+
+  if (temp > 35)
+    tips.push(
+      "🌡️ Heat stress warning — increase irrigation frequency."
+    );
+
+  // Disease advice
+  if (diseaseRisk === "HIGH")
+    tips.push(
+      "🦠 High disease risk detected — inspect crops immediately."
+    );
+
+  // Crop-specific advice
+
+  if (crop === "Rice" && currentStage === "Vegetative")
+    tips.push(
+      "🌾 Rice Vegetative Stage — apply nitrogen fertilizer if scheduled."
+    );
+
+  if (crop === "Rice" && currentStage === "Flowering")
+    tips.push(
+      "🌾 Rice Flowering Stage — monitor for pest and fungal attacks."
+    );
+
+  if (crop === "Wheat" && currentStage === "Tillering")
+    tips.push(
+      "🌾 Wheat Tillering Stage — urea top dressing is recommended."
+    );
+
+  if (crop === "Cotton" && currentStage === "Flowering")
+    tips.push(
+      "🌱 Cotton Flowering Stage — monitor for bollworm activity."
+    );
+
+  const fillers = [
+    "✅ Conditions look favorable for regular field operations.",
+    "🌱 Continue routine monitoring for pests and disease signs.",
+    "📅 Good day for general farm maintenance."
+  ];
+
+  let i = 0;
+
+  while (tips.length < 4 && i < fillers.length) {
+    tips.push(fillers[i]);
+    i++;
+  }
+
+  return tips.slice(0, 4);
+}
+
+// Simple hardcoded stage map keyed by crop name (user.mainCrop)
+
+
+const cropStageMap = {
+  Rice: {
+    stages: ["Sowing", "Vegetative", "Flowering", "Grain Filling", "Harvest"],
+    stageDays: [20, 45, 70, 100],
+    nextAction: "Apply nitrogen fertilizer for better tillering"
+  },
+
+  Paddy: {
+    stages: ["Sowing", "Vegetative", "Flowering", "Grain Filling", "Harvest"],
+    stageDays: [20, 45, 70, 100],
+    nextAction: "Apply nitrogen fertilizer for better tillering"
+  },
+
+  Wheat: {
+    stages: ["Sowing", "Tillering", "Flowering", "Grain Filling", "Harvest"],
+    stageDays: [15, 40, 65, 95],
+    nextAction: "Apply urea top dressing"
+  },
+
+  Cotton: {
+    stages: ["Sowing", "Vegetative", "Flowering", "Boll Formation", "Harvest"],
+    stageDays: [25, 55, 85, 130],
+    nextAction: "Monitor for bollworm and apply potash"
+  },
+
+  Maize: {
+    stages: ["Sowing", "Vegetative", "Tasseling", "Grain Filling", "Harvest"],
+    stageDays: [18, 45, 75, 110],
+    nextAction: "Apply nitrogen top dressing"
+  },
+
+  Sugarcane: {
+    stages: ["Planting", "Tillering", "Grand Growth", "Maturity", "Harvest"],
+    stageDays: [40, 120, 240, 330],
+    nextAction: "Earthing up and irrigation"
+  },
+
+  Tomato: {
+    stages: ["Nursery", "Vegetative", "Flowering", "Fruiting", "Harvest"],
+    stageDays: [15, 35, 60, 90],
+    nextAction: "Apply calcium spray"
+  },
+
+  Soybean: {
+    stages: ["Sowing", "Vegetative", "Flowering", "Pod Filling", "Harvest"],
+    stageDays: [20, 45, 70, 100],
+    nextAction: "Apply phosphorus fertilizer"
+  }
+};
+
+function getCropStage(crop, sowingDate) {
+
+  const cropData = cropStageMap[crop];
+
+  if (!cropData) return null;
+
+  const today = new Date();
+  const sowDate = new Date(sowingDate);
+
+  const daysAfterSowing = Math.max(
+  0,
+  Math.floor(
+    (today - sowDate) /
+    (1000 * 60 * 60 * 24)
+  )
+);
+
+  let currentIndex = 0;
+
+  for (let i = 0; i < cropData.stageDays.length; i++) {
+
+    if (daysAfterSowing > cropData.stageDays[i]) {
+      currentIndex = i + 1;
+    }
+
+  }
+
+  currentIndex = Math.min(
+    currentIndex,
+    cropData.stages.length - 1
+  );
+
+  const nextBoundary =
+    cropData.stageDays[currentIndex];
+
+  return {
+    currentIndex,
+    currentStage:
+      cropData.stages[currentIndex],
+    daysAfterSowing,
+    daysToNext:
+      nextBoundary
+        ? nextBoundary - daysAfterSowing
+        : 0,
+    nextAction:
+      cropData.nextAction,
+    stages:
+      cropData.stages
+  };
+}
+
+
+
+// ── Circular Progress Ring ───────────────────────────────────────
+function CircularProgress({ percentage, size = 140, strokeWidth = 12, color = "#4a7c59", trackColor = "#e8f0e4" }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(100, Math.max(0, percentage)) / 100) * circumference;
+  return (
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size / 2} cy={size / 2} r={radius} stroke={trackColor} strokeWidth={strokeWidth} fill="none" />
+      <circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth={strokeWidth} fill="none"
+        strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+        style={{ transition: "stroke-dashoffset 0.6s ease" }} />
+    </svg>
+  );
+}
+
 // ── Sparkline Component ──────────────────────────────────────────
 function Sparkline({ data, color }) {
   const min = Math.min(...data), max = Math.max(...data);
@@ -462,7 +394,7 @@ function Sparkline({ data, color }) {
 }
  
 // ── AI Chat Component ────────────────────────────────────────────
-function FarmTaskChecklist({ t = translations.English }) {
+function FarmTaskChecklist() {
   const defaultTasks = [
     { id: 1, text: "Check soil moisture levels", done: false },
     { id: 2, text: "Inspect crops for disease signs", done: false },
@@ -510,15 +442,15 @@ function FarmTaskChecklist({ t = translations.English }) {
       </div>
       <div style={{ display: "flex", gap: 8 }}>
         <input value={newTask} onChange={e => setNewTask(e.target.value)} onKeyDown={e => e.key === "Enter" && addTask()}
-          placeholder={t.addTaskPlaceholder}
+          placeholder="Add a new task..."
           style={{ flex: 1, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "9px 14px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif" }} />
-        <button onClick={addTask} style={{ background: theme.leaf, color: "#fff", border: "none", borderRadius: 10, padding: "9px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{t.addTask}</button>
+        <button onClick={addTask} style={{ background: theme.leaf, color: "#fff", border: "none", borderRadius: 10, padding: "9px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ Add</button>
       </div>
     </div>
   );
 }
 
-function CropCalendar({ t = translations.English }) {
+function CropCalendar() {
   const month = new Date().toLocaleString("en-IN", { month: "long" });
   const activities = {
     January: [{ crop: "Wheat", task: "Irrigation & top dressing fertilizer", icon: "🌾" }, { crop: "Mustard", task: "Watch for aphid attack", icon: "🌻" }, { crop: "Potato", task: "Earthing up operation", icon: "🥔" }],
@@ -538,8 +470,8 @@ function CropCalendar({ t = translations.English }) {
 
   return (
     <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 4, fontWeight: 700 }}>{t.cropCalendar}</div>
-      <div style={{ fontSize: 12, color: theme.muted, marginBottom: 14 }}>{t.whatToDoThis} {month}</div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 4, fontWeight: 700 }}>📅 Crop Calendar</div>
+      <div style={{ fontSize: 12, color: theme.muted, marginBottom: 14 }}>What to do this {month}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {tasks.map((item, i) => (
           <div key={i} style={{ display: "flex", gap: 12, padding: "12px 14px", borderRadius: 12, background: i === 0 ? "#f0fff4" : i === 1 ? "#fff8e1" : "#f3e5f5", border: `1px solid ${i === 0 ? "#a5d6a7" : i === 1 ? "#ffe082" : "#ce93d8"}` }}>
@@ -555,7 +487,7 @@ function CropCalendar({ t = translations.English }) {
   );
 }
 
-function HarvestPoll({ t = translations.English }) {
+function HarvestPoll() {
   const [voted, setVoted] = useState(null);
   const [votes, setVotes] = useState({ excellent: 142, good: 89, average: 34, poor: 12 });
 
@@ -575,8 +507,8 @@ function HarvestPoll({ t = translations.English }) {
 
   return (
     <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 4, fontWeight: 700 }}>{t.harvestPoll}</div>
-      <div style={{ fontSize: 12, color: theme.muted, marginBottom: 16 }}>{t.harvestQuestion}</div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 4, fontWeight: 700 }}>📊 Harvest Poll</div>
+      <div style={{ fontSize: 12, color: theme.muted, marginBottom: 16 }}>How is your harvest this season?</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {options.map(opt => {
           const pct = Math.round((votes[opt.key] / total) * 100);
@@ -602,7 +534,341 @@ function HarvestPoll({ t = translations.English }) {
   );
 }
 
-function SchemesTab({ t, language, authFetch }) {
+// ── Smart Farm Insights Section ──────────────────────────────────
+function SmartFarmInsights({ conditions,crop,currentStage }) {
+ const diseaseRisk = useMemo(
+    () => computeDiseaseRisk(conditions.humidity, conditions.heavyRain),
+    [conditions.humidity, conditions.heavyRain]
+  );
+ const cropHealth = useMemo(
+  () =>
+    computeCropHealth(
+      crop,
+      currentStage,
+      conditions.temp,
+      conditions.humidity,
+      conditions.heavyRain,
+      diseaseRisk.level
+    ),
+  [
+    conditions.temp,
+    conditions.humidity,
+    conditions.heavyRain,
+    diseaseRisk.level
+  ]
+);
+ 
+  const advisoryTips = useMemo(
+    () =>
+      generateAdvisory(
+      crop,
+      currentStage,
+      diseaseRisk.level,
+      conditions.temp,
+      conditions.humidity,
+      conditions.wind,
+      conditions.heavyRain
+      ),
+    [
+  crop,
+  currentStage,
+  diseaseRisk.level,
+  conditions.temp,
+  conditions.humidity,
+  conditions.wind,
+  conditions.heavyRain
+]
+    );
+
+  const healthColor = cropHealth.score >= 90 ? "#2e7d32" : cropHealth.score >= 75 ? theme.leaf : cropHealth.score >= 60 ? "#f9a825" : theme.red;
+  const cardStyle = { background: theme.card, borderRadius: 18, border: `1px solid ${theme.border}`, padding: 22, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" };
+  const titleStyle = { fontFamily: "'Playfair Display', serif", fontSize: 15, color: theme.soil, fontWeight: 700 };
+
+  return (
+    <div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>🧠 Smart Farm Insights</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 16 }}>
+
+        {/* Crop Health Score */}
+        <div className="card-hover" style={{ ...cardStyle, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          <div style={{ ...titleStyle, alignSelf: "flex-start", marginBottom: 14 }}>🌱 Crop Health Score</div>
+          <div style={{ position: "relative", width: 140, height: 140, marginBottom: 12 }}>
+            <CircularProgress percentage={cropHealth.score} color={healthColor} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 900, color: theme.soil }}>{cropHealth.score}%</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: healthColor }}>{cropHealth.status}</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 12, color: theme.muted, lineHeight: 1.4 }}>{cropHealth.note}</div>
+        </div>
+
+        {/* Disease Risk Alert */}
+        <div className="card-hover" style={cardStyle}>
+          <div style={titleStyle}>🦠 Disease Risk</div>
+          <div style={{ display: "flex", justifyContent: "center", margin: "22px 0 16px" }}>
+            <div style={{ padding: "10px 26px", borderRadius: 30, fontWeight: 900, fontSize: 17, letterSpacing: 1, background: diseaseRisk.bg, color: diseaseRisk.color, border: `2px solid ${diseaseRisk.color}` }}>
+              {diseaseRisk.icon} {diseaseRisk.level}
+            </div>
+          </div>
+          <div style={{ fontSize: 12, color: theme.muted, textAlign: "center", lineHeight: 1.5 }}>{diseaseRisk.text}</div>
+        </div>
+
+        {/* Today's AI Advisory */}
+        <div className="card-hover" style={cardStyle}>
+          <div style={titleStyle}>🤖 Today's AI Advisory</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
+            {advisoryTips.map((tip, i) => (
+              <div key={i} style={{ padding: "10px 12px", borderRadius: 10, background: "#fafaf6", border: `1px solid ${theme.border}`, fontSize: 12.5, color: theme.soil, lineHeight: 1.4 }}>
+                {tip}
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+const stageRecommendations = {
+  Wheat: {
+    Sowing: "Prepare irrigation schedule",
+    Tillering: "Apply urea top dressing",
+    Flowering: "Monitor fungal diseases",
+    "Grain Filling": "Maintain soil moisture",
+    Harvest: "Prepare harvesting equipment"
+  },
+
+  Rice: {
+    Sowing: "Maintain nursery moisture",
+    Vegetative: "Apply nitrogen fertilizer",
+    Flowering: "Monitor pest attacks",
+    "Grain Filling": "Ensure water availability",
+    Harvest: "Prepare harvesting"
+  },
+
+  Cotton: {
+    Sowing: "Maintain seedling moisture",
+    Vegetative: "Apply potash fertilizer",
+    Flowering: "Monitor bollworm attack",
+    "Boll Formation": "Check nutrient deficiency",
+    Harvest: "Prepare harvesting"
+  },
+
+  Maize: {
+    Sowing: "Ensure proper germination",
+    Vegetative: "Apply nitrogen fertilizer",
+    Tasseling: "Monitor water stress",
+    "Grain Filling": "Maintain soil moisture",
+    Harvest: "Prepare harvesting"
+  }
+};
+
+
+// ── Crop Stage Tracker ───────────────────────────────────────────
+function CropStageTracker({ crop = "Rice", sowingDate,  onEdit }) {
+   const data =
+  getCropStage(
+    crop,
+    sowingDate
+  ) ||
+  getCropStage(
+    "Rice",
+    sowingDate
+  );
+
+const recommendation =
+  stageRecommendations[crop]?.[
+    data.currentStage
+  ] ||
+  "Monitor crop regularly";
+
+const stagePct =
+  Math.round(
+    (data.daysAfterSowing /
+      (data.daysAfterSowing + data.daysToNext || 1)) *
+      100
+  );
+
+  return (
+    <div className="card-hover" style={{ background: theme.card, borderRadius: 18, border: `1px solid ${theme.border}`, padding: 22, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
+ 
+    <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16
+  }}
+>
+  <div
+    style={{
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 16,
+      color: theme.soil,
+      fontWeight: 700
+    }}
+  >
+    🌾 Crop Stage Tracker
+  </div>
+
+  <button
+    onClick={() => {
+      console.log("Edit clicked");
+      onEdit && onEdit();
+    }}
+    style={{
+      border: "none",
+      background: "#f5f5f5",
+      borderRadius: 8,
+      padding: "6px 10px",
+      cursor: "pointer"
+    }}
+  >
+    ⚙️ Edit
+  </button>
+</div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
+        <div>
+          <div style={{ fontSize: 10, color: theme.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Current Crop</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: theme.soil, marginTop: 2 }}>🌾 {crop}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: theme.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Current Stage</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: theme.leaf, marginTop: 2 }}>{data.currentStage}</div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "flex-start", marginBottom: 18 }}>
+        {data.stages.map((stage, i) => (
+          <React.Fragment key={stage}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 56 }}>
+              <div style={{ width: 14, height: 14, borderRadius: "50%", background: i <= data.currentIndex ? theme.leaf : "#e0e0e0", border: `2px solid ${i === data.currentIndex ? theme.leaf : "#ddd"}`, boxShadow: i === data.currentIndex ? "0 0 0 4px rgba(74,124,89,0.15)" : "none" }} />
+              <div style={{ fontSize: 10, marginTop: 6, color: i === data.currentIndex ? theme.leaf : theme.muted, fontWeight: i === data.currentIndex ? 700 : 400, textAlign: "center" }}>{stage}</div>
+            </div>
+            {i < data.stages.length - 1 && <div style={{ flex: 1, height: 3, background: i < data.currentIndex ? theme.leaf : "#e0e0e0", marginTop: 6 }} />}
+          </React.Fragment>
+        ))}
+      </div>
+
+      <div style={{ height: 8, background: "#eee", borderRadius: 4, marginBottom: 16, overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${stagePct}%`, background: `linear-gradient(90deg, ${theme.leaf}, ${theme.leafLight})`, borderRadius: 4, transition: "width 0.5s" }} />
+      </div>
+
+      <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+        <div style={{ flex: 1, background: "#f0fff4", borderRadius: 10, padding: "10px 12px", border: "1px solid #c8e6c9" }}>
+          <div style={{ fontSize: 9, color: theme.muted, fontWeight: 700, textTransform: "uppercase" }}>Days After Sowing</div>
+          <div style={{ fontSize: 19, fontWeight: 700, color: theme.soil }}>{data.daysAfterSowing} <span style={{ fontSize: 11, fontWeight: 400 }}>Days</span></div>
+        </div>
+        <div style={{ flex: 1, background: "#fff8e1", borderRadius: 10, padding: "10px 12px", border: "1px solid #ffe082" }}>
+          <div style={{ fontSize: 9, color: theme.muted, fontWeight: 700, textTransform: "uppercase" }}>Days to Next Stage</div>
+          <div style={{ fontSize: 19, fontWeight: 700, color: theme.soil }}>{data.daysToNext} <span style={{ fontSize: 11, fontWeight: 400 }}>Days</span></div>
+        </div>
+      </div>
+
+      <div style={{ background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 12, padding: "12px 14px", fontSize: 12, color: theme.soil, lineHeight: 1.4 }}>
+        <span style={{ fontWeight: 700 }}>💡 Next Recommended Action: </span>{recommendation}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+function FarmProfileCard() {
+  const [crop, setCrop] = useState(
+    localStorage.getItem("crop") || ""
+  );
+
+  const [sowingDate, setSowingDate] = useState(
+    localStorage.getItem("sowingDate") || ""
+  );
+
+  const saveProfile = () => {
+
+  if (!crop) {
+    alert("Please select crop");
+    return;
+  }
+
+  if (!sowingDate) {
+    alert("Please select sowing date");
+    return;
+  }
+
+  if (new Date(sowingDate) > new Date()) {
+    alert("Sowing date cannot be in future");
+    return;
+  }
+
+  localStorage.setItem("crop", crop);
+  localStorage.setItem("sowingDate", sowingDate);
+
+  alert("Farm profile saved");
+
+  window.location.reload();
+};
+
+  return (
+    <div
+      style={{
+        background: "#fff",
+        padding: 20,
+        borderRadius: 16,
+        border: "1px solid #ddd"
+      }}
+    >
+      <h3>🌾 My Farm Profile</h3>
+
+      <select
+        value={crop}
+        onChange={(e) => setCrop(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 10,
+          marginBottom: 12
+        }}
+      >
+        <option value="">Select Crop</option>
+        <option>Rice</option>
+        <option>Wheat</option>
+        <option>Cotton</option>
+        <option>Maize</option>
+        <option>Tomato</option>
+        <option>Soybean</option>
+      </select>
+
+     <input
+  type="date"
+  value={sowingDate}
+  max={new Date().toISOString().split("T")[0]}
+  onChange={(e) => setSowingDate(e.target.value)}
+  style={{
+    width: "100%",
+    padding: 10,
+    marginBottom: 12
+  }}
+/>
+
+      <button
+        onClick={saveProfile}
+        style={{
+          background: "#2e7d32",
+          color: "white",
+          border: "none",
+          padding: "10px 16px",
+          borderRadius: 8
+        }}
+      >
+        Save Profile
+      </button>
+    </div>
+  );
+}
+function SchemesTab({ authFetch }) {
   
   const [state, setState] = useState("Andhra Pradesh");
   const [category, setCategory] = useState("All");
@@ -732,7 +998,7 @@ function SchemesTab({ t, language, authFetch }) {
 
       {/* Filter & Search */}
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 14 }}>🏛️ {t.schemesTitle}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 14 }}>🏛️ Government Schemes</div>
 
         {/* Search */}
         <input value={search} onChange={e => setSearch(e.target.value)}
@@ -762,9 +1028,9 @@ function SchemesTab({ t, language, authFetch }) {
                   <div style={{ fontSize: 13, color: theme.muted, marginTop: 4, maxWidth: 500 }}>{s.desc}</div>
                 </div>
                 {s.eligible ? (
-                  <span style={{ background: "#e8f5e9", color: "#2e7d32", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", marginLeft: 12 }}>✅ {t.eligible}</span>
+                  <span style={{ background: "#e8f5e9", color: "#2e7d32", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", marginLeft: 12 }}>✅ Eligible</span>
                 ) : (
-                  <span style={{ background: "#fce4ec", color: "#c62828", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", marginLeft: 12 }}>❌ {t.notEligible}</span>
+                  <span style={{ background: "#fce4ec", color: "#c62828", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", marginLeft: 12 }}>❌ Not Eligible</span>
                 )}
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 12, alignItems: "center" }}>
@@ -788,7 +1054,7 @@ function SchemesTab({ t, language, authFetch }) {
 
 
 // ── AI Chat Component ────────────────────────────────────────────
-function MarketTab({ t, language, authFetch }) {
+function MarketTab({ authFetch }) {
   
   const [prices, setPrices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -842,23 +1108,11 @@ function fetchPrices() {
 }
   const indianStates = ["Andhra Pradesh","Telangana","Maharashtra","Punjab","Haryana","Uttar Pradesh","Madhya Pradesh","Rajasthan","Gujarat","Karnataka","Tamil Nadu","Kerala","Bihar","West Bengal","Odisha"];
 
-  const cropNames = {
-    English: { Wheat:"Wheat", Rice:"Rice", Tomato:"Tomato", Onion:"Onion", Potato:"Potato", Cotton:"Cotton", Soybean:"Soybean", Maize:"Maize", Groundnut:"Groundnut", Chilli:"Chilli" },
-    Hindi: { Wheat:"गेहूं", Rice:"चावल", Tomato:"टमाटर", Onion:"प्याज", Potato:"आलू", Cotton:"कपास", Soybean:"सोयाबीन", Maize:"मक्का", Groundnut:"मूंगफली", Chilli:"मिर्च" },
-    Telugu: { Wheat:"గోధుమ", Rice:"వరి", Tomato:"టమాటా", Onion:"ఉల్లిపాయ", Potato:"బంగాళాదుంప", Cotton:"పత్తి", Soybean:"సోయాబీన్", Maize:"మొక్కజొన్న", Groundnut:"వేరుశనగ", Chilli:"మిర్చి" },
-    Tamil: { Wheat:"கோதுமை", Rice:"அரிசி", Tomato:"தக்காளி", Onion:"வெங்காயம்", Potato:"உருளைக்கிழங்கு", Cotton:"பருத்தி", Soybean:"சோயாபீன்", Maize:"மக்காச்சோளம்", Groundnut:"வேர்க்கடலை", Chilli:"மிளகாய்" },
-    Kannada: { Wheat:"ಗೋಧಿ", Rice:"ಭತ್ತ", Tomato:"ಟೊಮೇಟೊ", Onion:"ಈರುಳ್ಳಿ", Potato:"ಆಲೂಗಡ್ಡೆ", Cotton:"ಹತ್ತಿ", Soybean:"ಸೋಯಾಬೀನ್", Maize:"ಮೆಕ್ಕೆಜೋಳ", Groundnut:"ಕಡಲೆಕಾಯಿ", Chilli:"ಮೆಣಸಿನಕಾಯಿ" },
-    Marathi: { Wheat:"गहू", Rice:"तांदूळ", Tomato:"टोमॅटो", Onion:"कांदा", Potato:"बटाटा", Cotton:"कापूस", Soybean:"सोयाबीन", Maize:"मका", Groundnut:"भुईमूग", Chilli:"मिरची" },
-    Punjabi: { Wheat:"ਕਣਕ", Rice:"ਚਾਵਲ", Tomato:"ਟਮਾਟਰ", Onion:"ਪਿਆਜ਼", Potato:"ਆਲੂ", Cotton:"ਕਪਾਹ", Soybean:"ਸੋਇਆਬੀਨ", Maize:"ਮੱਕੀ", Groundnut:"ਮੂੰਗਫਲੀ", Chilli:"ਮਿਰਚ" },
-  };
-
-  const getCropName = (crop) => cropNames[language]?.[crop] || crop;
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 4 }}>📊 {t.marketTitle}</div>
-        <p style={{ fontSize: 12, color: theme.muted, marginBottom: 14 }}>{t.mandiPriceSub}</p>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 4 }}>📊 Mandi Prices Today</div>
+        <p style={{ fontSize: 12, color: theme.muted, marginBottom: 14 }}>AI-powered daily mandi prices · Select your state and refresh anytime</p>
         <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
           <select value={state} onChange={e => setState(e.target.value)}
             style={{ flex: 1, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif" }}>
@@ -888,7 +1142,7 @@ function fetchPrices() {
             </div>
             {prices.map((m, i) => (
               <div key={i} style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 80px", padding: "12px 16px", background: i % 2 === 0 ? "#fff" : "#fafaf6", alignItems: "center", borderBottom: `1px solid ${theme.border}` }}>
-                <span style={{ fontWeight: 700, color: theme.soil, fontSize: 14 }}>🌾 {getCropName(m.crop)}</span>
+                <span style={{ fontWeight: 700, color: theme.soil, fontSize: 14 }}>🌾 {m.crop}</span>
                 <span style={{ textAlign: "right", fontWeight: 700, fontSize: 15, color: theme.soil }}><div style={{ textalign: "right" }}>
   <div
     style={{
@@ -932,7 +1186,7 @@ function fetchPrices() {
 
       {tip && (
         <div style={{ background: "#e8f5e9", borderRadius: 14, border: "1px solid #c8e6c9", padding: 16, fontSize: 13, color: "#2e7d32" }}>
-          💡 <strong>{t.marketTip}:</strong>
+          💡 <strong>Market Tip:</strong>
  {tip}
         </div>
       )}
@@ -940,7 +1194,7 @@ function fetchPrices() {
       {prices.length > 0 && (
         <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 4 }}>🏆 Price Change Leaderboard</div>
-          <div style={{ fontSize: 12, color: theme.muted, marginBottom: 16 }}>{t.priceChangeIn} {state}</div>
+          <div style={{ fontSize: 12, color: theme.muted, marginBottom: 16 }}>Crops ranked by today's price change in {state}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[...prices].sort((a, b) => b.change - a.change).map((m, i) => {
               const isTop = i < 3;
@@ -950,7 +1204,7 @@ function fetchPrices() {
               return (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 10, background: isTop ? "#f0fff4" : isBottom ? "#fff5f5" : "#fafaf6", border: `1px solid ${isTop ? "#a5d6a7" : isBottom ? "#ffcdd2" : theme.border}` }}>
                   <div style={{ fontSize: 18, minWidth: 32, textAlign: "center" }}>{medal}</div>
-                  <div style={{ fontWeight: 700, color: theme.soil, fontSize: 14, minWidth: 80 }}>🌾 {getCropName(m.crop)}</div>
+                  <div style={{ fontWeight: 700, color: theme.soil, fontSize: 14, minWidth: 80 }}>🌾 {m.crop}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ height: 8, borderRadius: 4, background: "#eee", overflow: "hidden" }}>
                       <div style={{ height: "100%", width: `${barWidth}%`, background: m.change >= 0 ? "#4caf50" : "#f44336", borderRadius: 4, transition: "width 0.5s" }} />
@@ -984,7 +1238,7 @@ function fetchPrices() {
             })}
           </div>
           <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 12 }}>
-            <span style={{ color: "#2e7d32" }}>{t.topSell}</span>
+            <span style={{ color: "#2e7d32" }}>🟢 Top 3 = Good time to sell</span>
             <span style={{ color: theme.red }}>🔴 Bottom 3 = Prices falling
 </span>
           </div>
@@ -996,7 +1250,7 @@ function fetchPrices() {
 
 
 
-function WeatherTab({ t }) {
+function WeatherTab() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -1012,7 +1266,7 @@ function WeatherTab({ t }) {
         `https://api.weatherapi.com/v1/forecast.json?key=8b00faec197b4af3aa195603260306&q=${encodeURIComponent(city)}&days=7&aqi=no&alerts=no`
       );
       const data = await res.json();
-      if (data.error) { setError(t.weatherNotFound || "Location not found."); }
+      if (data.error) { setError("Location not found."); }
       else { setWeather(data); }
     } catch { setError("Could not fetch weather. Check your internet."); }
     setLoading(false);
@@ -1021,14 +1275,14 @@ function WeatherTab({ t }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 12 }}>🌦️ {t.weatherTitle}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 12 }}>🌦️ Live Weather by Location</div>
         <div style={{ display: "flex", gap: 10 }}>
           <input value={city} onChange={e => setCity(e.target.value)} onKeyDown={e => e.key === "Enter" && getWeather()}
-            placeholder={t.weatherPlaceholder}
+            placeholder="Enter city, district or state e.g. Visakhapatnam"
             style={{ flex: 1, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "10px 16px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif" }} />
           <button onClick={getWeather} disabled={loading}
             style={{ background: "#1565c0", color: "#fff", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Lato', sans-serif" }}>
-            {loading ? t.loading : `🔍 ${t.searchBtn}`}
+            {loading ? "Loading..." : "🔍 Search"}
           </button>
         </div>
         {error && <div style={{ marginTop: 10, color: theme.red, fontSize: 13 }}>{error}</div>}
@@ -1046,14 +1300,14 @@ function WeatherTab({ t }) {
               <img src={weather.current.condition.icon} alt="weather" style={{ width: 80, height: 80 }} />
             </div>
             <div style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.3)" }}>
-              {[{ label: "Feels Like", val: `${weather.current.feelslike_c}°C` }, { label: t.humidity, val: `${weather.current.humidity}%` }, { label: "Wind", val: `${weather.current.wind_kph} km/h` }].map((s, i) => (
+              {[{ label: "Feels Like", val: `${weather.current.feelslike_c}°C` }, { label: "Humidity", val: `${weather.current.humidity}%` }, { label: "Wind", val: `${weather.current.wind_kph} km/h` }].map((s, i) => (
                 <div key={i}><div style={{ opacity: 0.7, fontSize: 12 }}>{s.label}</div><div style={{ fontWeight: 700, fontSize: 16 }}>{s.val}</div></div>
               ))}
             </div>
           </div>
 
           <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 16 }}>{t.forecastLabel}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 16 }}>7-Day Forecast</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8 }}>
               {weather.forecast.forecastday.map((f, i) => (
                 <div key={i} style={{ textAlign: "center", background: "#f5f5f5", borderRadius: 12, padding: 12 }}>
@@ -1068,7 +1322,7 @@ function WeatherTab({ t }) {
           </div>
 
           <div style={{ background: "#fff3e0", borderRadius: 16, border: "1px solid #ffcc80", padding: 20 }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: "#e65100", marginBottom: 12 }}>⚠️ {t.farmAlerts} {weather.location.name}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: "#e65100", marginBottom: 12 }}>⚠️ Farm Alert for {weather.location.name}</div>
             <div style={{ fontSize: 13, color: "#bf360c" }}>• {weather.current.humidity > 80 ? "High humidity — watch for fungal diseases on crops." : "Humidity levels normal — good for most crops."}</div>
             <div style={{ fontSize: 13, color: "#bf360c", marginTop: 6 }}>• {weather.current.wind_kph > 25 ? "Strong winds — avoid spraying pesticides today." : "Wind speed is low — safe for pesticide spraying."}</div>
             <div style={{ fontSize: 13, color: "#bf360c", marginTop: 6 }}>• {weather.forecast.forecastday[0].day.daily_chance_of_rain > 60 ? "High chance of rain — delay irrigation and harvesting." : "Low rain chance — irrigation may be needed."}</div>
@@ -1086,7 +1340,7 @@ function WeatherTab({ t }) {
 }
 
 
-function AIAdvisor({ t, language, authFetch }) {
+function AIAdvisor({ authFetch }) {
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Namaste! 🌾 I'm your AI Farm Advisor. Ask me anything!" }
   ]);
@@ -1103,7 +1357,7 @@ function AIAdvisor({ t, language, authFetch }) {
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
     setLoading(true);
     try {
-      const reply = await apiChat(authFetch, `You are an expert agricultural advisor for Indian farmers. Answer this: ${userMsg}. Please Respond entirely in ${languageNativeName[language]} language. Do not switch to English.`) || "Sorry, I couldn't process that. Please try again.";
+      const reply = await apiChat(authFetch, `You are an expert agricultural advisor for Indian farmers. Answer this: ${userMsg}. Please respond entirely in English.`) || "Sorry, I couldn't process that. Please try again.";
       setMessages(prev => [...prev, { role: "assistant", text: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", text: "Connection error. Please check your internet and try again." }]);
@@ -1117,9 +1371,9 @@ function AIAdvisor({ t, language, authFetch }) {
         <span style={{ fontSize: 24 }}>🤖</span>
         <div>
           <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, fontFamily: "'Playfair Display', serif" }}>AI Farm Advisor</div>
-          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>{t.poweredBy}</div>
+          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>Powered by Claude</div>
         </div>
-        <div style={{ marginLeft: "auto", background: "#6db87f", borderRadius: 20, padding: "3px 10px", fontSize: 11, color: "#fff" }}>● {t.onlineStatus}</div>
+        <div style={{ marginLeft: "auto", background: "#6db87f", borderRadius: 20, padding: "3px 10px", fontSize: 11, color: "#fff" }}>● Online</div>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
         {messages.map((m, i) => (
@@ -1147,11 +1401,11 @@ function AIAdvisor({ t, language, authFetch }) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && send()}
-          placeholder={t.chatPlaceholder}
+          placeholder="Ask about crops, diseases, schemes..."
           style={{ flex: 1, border: `1px solid ${theme.border}`, borderRadius: 24, padding: "9px 16px", fontSize: 13, outline: "none", background: "#fafaf6", fontFamily: "'Lato', sans-serif", color: theme.soil }}
         />
         <button onClick={send} disabled={loading} style={{ background: theme.leaf, color: "#fff", border: "none", borderRadius: 24, padding: "9px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Lato', sans-serif" }}>
-          {t.sendBtn}
+          Send
         </button>
       </div>
     </div>
@@ -1159,7 +1413,7 @@ function AIAdvisor({ t, language, authFetch }) {
 }
  
 // ── Disease Analyzer ─────────────────────────────────────────────
-function DiseaseAnalyzer({ t, language, authFetch }) {
+function DiseaseAnalyzer({ authFetch }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -1188,7 +1442,7 @@ function DiseaseAnalyzer({ t, language, authFetch }) {
         const text = await apiAnalyzeImage(authFetch, image, query);
         setResult(text || "Could not analyze image. Please try again.");
       } else {
-        const text = await apiChat(authFetch, `You are a plant pathologist. A farmer describes these crop symptoms: ${query}. Identify the disease, cause, severity, treatment steps, and prevention tips. Please Respond entirely in ${languageNativeName[language]} language. Do not switch to English.`);
+        const text = await apiChat(authFetch, `You are a plant pathologist. A farmer describes these crop symptoms: ${query}. Identify the disease, cause, severity, treatment steps, and prevention tips. Please respond entirely in English.`);
         setResult(text || "Could not analyze. Please try again.");
       }
     } catch {
@@ -1200,8 +1454,8 @@ function DiseaseAnalyzer({ t, language, authFetch }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 12 }}>🔍 {t.diseaseTitle}</div>
-        <p style={{ fontSize: 13, color: theme.muted, marginBottom: 14, fontFamily: "'Lato', sans-serif" }}>{t.diseaseDesc}</p>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 12 }}>🔍 AI Disease Diagnosis</div>
+        <p style={{ fontSize: 13, color: theme.muted, marginBottom: 14, fontFamily: "'Lato', sans-serif" }}>Upload a photo of your crop OR describe the symptoms below.</p>
 
         <div onClick={() => fileRef.current.click()}
           style={{ border: `2px dashed ${imagePreview ? theme.leaf : theme.border}`, borderRadius: 12, padding: 20, textAlign: "center", cursor: "pointer", background: imagePreview ? "#f0f7f0" : "#fafaf6", marginBottom: 12 }}>
@@ -1231,7 +1485,7 @@ function DiseaseAnalyzer({ t, language, authFetch }) {
         />
         <button onClick={analyze} disabled={loading || (!query.trim() && !image)}
           style={{ marginTop: 10, background: loading ? theme.muted : theme.red, color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", fontWeight: 700, fontSize: 13, cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Lato', sans-serif" }}>
-          {loading ? t.diseaseLoading : image ? `🔬 ${t.diseaseAnalyze}` : `🧬 ${t.diseaseBtn}`}
+          {loading ? "Analyzing..." : image ? "🔬 Analyze Photo" : "🧬 Diagnose Disease"}
         </button>
         {result && (
           <div style={{ marginTop: 16, background: "#fff9f0", border: `1px solid #f5ddb0`, borderRadius: 10, padding: 16, fontSize: 13, color: theme.soil, lineHeight: 1.7, fontFamily: "'Lato', sans-serif", whiteSpace: "pre-wrap" }}>
@@ -1268,7 +1522,7 @@ function DiseaseAnalyzer({ t, language, authFetch }) {
 }
  
 // ── Crop Recommender ─────────────────────────────────────────────
-function CropRecommender({ t, language, authFetch }) {
+function CropRecommender({ authFetch }) {
   const [season, setSeason] = useState("Kharif");
   const [soil, setSoil] = useState("");
   const [crop, setCrop] = useState("");
@@ -1319,7 +1573,7 @@ setAiTips(localTips[crop] || "Local recommendation available.");
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 6 }}>🌱 {t.cropTitle}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 6 }}>🌱 Crop Advisor</div>
         <p style={{ fontSize: 13, color: theme.muted, marginBottom: 16 }}>Enter your crop, soil type and season to get AI-powered farming tips.</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
@@ -1391,7 +1645,7 @@ setAiTips(localTips[crop] || "Local recommendation available.");
 
         <button onClick={getAITips} disabled={!crop || !soil || !state}
           style={{ width: "100%", background: theme.leaf, color: "#fff", border: "none", borderRadius: 10, padding: "12px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Lato', sans-serif" }}>
-          {`💡 ${t.getAITips}`}
+          {"💡 Get AI Farming Tips"}
         </button>
 
         {aiTips && (
@@ -1440,7 +1694,7 @@ setAiTips(localTips[crop] || "Local recommendation available.");
   );
 }
  
-function YieldPredictor({ language, t, authFetch }) {
+function YieldPredictor() {
   
   const [crop, setCrop] = useState("");
   const [land, setLand] = useState("");
@@ -1532,7 +1786,7 @@ Note: These are estimated values based on standard agricultural data.
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: "linear-gradient(135deg, #1b5e20, #4caf50)", borderRadius: 16, padding: 24, color: "#fff" }}>
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, marginBottom: 6 }}> 🌾 Yield & Profit Predictor</div>
-        <div style={{ fontSize: 13, opacity: 0.85 }}>{t.yieldSub}</div>
+        <div style={{ fontSize: 13, opacity: 0.85 }}>Enter crop details → Get yield, revenue & profit estimate</div>
       </div>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -1606,7 +1860,7 @@ Note: These are estimated values based on standard agricultural data.
           </div>
           <button onClick={predict} disabled={loading || !crop.trim() || !land.trim()}
             style={{ background: loading ? theme.muted : "#1b5e20", color: "#fff", border: "none", borderRadius: 10, padding: "14px", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: "'Lato', sans-serif" }}>
-            {loading ? t.predictingBtn : t.predictBtn}
+            {loading ? "Predicting..." : "🌾 Predict Yield & Profit"}
           </button>
           {result && (
             <div style={{ background: "#f1f8e9", border: "1px solid #aed581", borderRadius: 12, padding: 18, fontSize: 13, color: theme.soil, lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
@@ -1619,7 +1873,7 @@ Note: These are estimated values based on standard agricultural data.
   );
 }
 
-function SoilAnalyzer({ language, t, authFetch }) {
+function SoilAnalyzer({ authFetch }) {
   
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -1770,7 +2024,7 @@ setResult({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: "linear-gradient(135deg, #4e342e, #8d6e63)", borderRadius: 16, padding: 24, color: "#fff" }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, marginBottom: 6 }}>{t.soilAnalyzerTitle}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, marginBottom: 6 }}>🪨 AI Soil Analyzer</div>
         <div style={{ fontSize: 13, opacity: 0.85 }}>Upload a photo of your soil → AI identifies type, quality & best crops</div>
       </div>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 24 }}>
@@ -1811,7 +2065,7 @@ setResult({
 </select>
         <button onClick={analyze} disabled={loading || (!image && !manualSoil)}
           style={{ width: "100%", background: loading ? theme.muted : "#4e342e", color: "#fff", border: "none", borderRadius: 10, padding: "14px", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>
-          {loading ? t.analyzingSoilBtn : t.analyzeSoilBtn}
+          {loading ? "Analyzing..." : "🔬 Analyze Soil"}
         </button>
         {result && typeof result === "object" && (
   <div
@@ -1860,7 +2114,7 @@ setResult({
   );
 }
 
-function MandiFinder({ language, t, authFetch }) {
+function MandiFinder() {
   
   const [state, setState] = useState("");
   const [mandis, setMandis] = useState([]);
@@ -1898,10 +2152,10 @@ function MandiFinder({ language, t, authFetch }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: "linear-gradient(135deg, #1a237e, #3949ab)", borderRadius: 16, padding: 24, color: "#fff" }}>
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, marginBottom: 6 }}>🗺️ Nearby Mandi Finder</div>
-        <div style={{ fontSize: 13, opacity: 0.85 }}>{t.mandiSub}</div>
+        <div style={{ fontSize: 13, opacity: 0.85 }}>Find nearest mandis and today's prices near you</div>
       </div>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 24 }}>
-        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: theme.muted, marginBottom: 8, textTransform: "uppercase" }}>{t.locationLabel}</label>
+        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: theme.muted, marginBottom: 8, textTransform: "uppercase" }}>Your Location</label>
         <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
          <select
   value={state}
@@ -1932,7 +2186,7 @@ function MandiFinder({ language, t, authFetch }) {
 </select>
           <button onClick={findMandis} disabled={loading || !state}
             style={{ background: "#1a237e", color: "#fff", border: "none", borderRadius: 10, padding: "12px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-            {loading ? t.findingBtn : t.findMandisBtn}
+            {loading ? "Finding..." : "🗺️ Find Nearby Mandis"}
           </button>
         </div>
         
@@ -1980,7 +2234,7 @@ function MandiFinder({ language, t, authFetch }) {
   );
 }
 
-function SeedCalculator({ language, t, authFetch }) {
+function SeedCalculator() {
   
   const [crop, setCrop] = useState("");
   const [land, setLand] = useState("");
@@ -2301,15 +2555,48 @@ const totalCost =
   export default function KisanSaathiDashboard() {
   const { authFetch, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [language, setLanguage] = useState("English");
-  const t = translations[language] || translations.English;
-console.log("Language:", language, "tempLabel:", translations[language]?.tempLabel);
 
   const [priceAlert, setPriceAlert] = useState({});
   const [dashWeather, setDashWeather] = useState(null);
   const [dashPrices, setDashPrices] = useState(marketPrices);
   const [dashLocation, setDashLocation] = useState("Visakhapatnam");
   const [dashLoading, setDashLoading] = useState(false);
+
+  const [farmProfile, setFarmProfile] = useState({
+  crop: localStorage.getItem("crop") || "Rice",
+  sowingDate:
+    localStorage.getItem("sowingDate") ||
+    new Date().toISOString().split("T")[0]
+});
+
+
+
+const [showFarmModal, setShowFarmModal] = useState(false);
+
+const saveFarmProfile = () => {
+
+  localStorage.setItem(
+    "crop",
+    farmProfile.crop
+  );
+
+  localStorage.setItem(
+    "sowingDate",
+    farmProfile.sowingDate
+  );
+
+  setFarmProfile({
+    crop: farmProfile.crop,
+    sowingDate: farmProfile.sowingDate
+  });
+
+  setShowFarmModal(false);
+};
+
+const conditions = useMemo(
+  () => getFarmConditions(dashWeather, weatherData),
+  [dashWeather]
+);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -2319,6 +2606,7 @@ console.log("Language:", language, "tempLabel:", translations[language]?.tempLab
           const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=8b00faec197b4af3aa195603260306&q=${latitude},${longitude}&days=7&aqi=no&alerts=no`);
           const data = await res.json();
           if (!data.error) {
+            console.log(data.location);
             setDashWeather(data);
             setDashLocation(data.location.name);
           }
@@ -2366,21 +2654,23 @@ Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, 
   }
  
   const tabs = [
-    { id: "dashboard", label: t.dashboard, icon: "🏠" },
-    { id: "weather", label: t.weather, icon: "🌤️" },
-    { id: "market", label: t.market, icon: "📈" },
-    { id: "crops", label: t.crops, icon: "🌱" },
-    { id: "disease", label: t.disease, icon: "🔬" },
-    { id: "schemes", label: t.schemes, icon: "🏛️" },
-    { id: "advisor", label: t.advisor, icon: "🤖" },
-    { id: "yield", label: t.yieldTab, icon: "📊" },
-    { id: "soil", label: t.soilTab, icon: "📸" },
-    { id: "mandi", label: t.mandiTab, icon: "🗺️" },
-    { id: "seed", label: t.seedTab, icon: "🧮" },
+    { id: "dashboard", label: "Dashboard", icon: "🏠" },
+    { id: "weather", label: "Weather", icon: "🌤️" },
+    { id: "market", label: "Market", icon: "📈" },
+    { id: "crops", label: "Crops", icon: "🌱" },
+    { id: "disease", label: "Disease", icon: "🔬" },
+    { id: "schemes", label: "Schemes", icon: "🏛️" },
+    { id: "advisor", label: "AI Advisor", icon: "🤖" },
+    { id: "yield", label: "Yield", icon: "📊" },
+    { id: "soil", label: "Soil AI", icon: "📸" },
+    { id: "mandi", label: "Mandis", icon: "🗺️" },
+    { id: "seed", label: "Seeds", icon: "🧮" },
     ...(user?.role === "admin"
     ? [{ id: "admin", label: "Admin", icon: "🛠️" }]
     : [])
   ];
+
+  
  
   return (
     <div style={{ minHeight: "100vh", background: "#f5f0e8", fontFamily: "'Lato', sans-serif" }}>
@@ -2397,23 +2687,115 @@ Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 30 }}>🌾</span>
           <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" }}>{t.appName}</div>
-            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, letterSpacing: 2, textTransform: "uppercase" }}>{t.tagline}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" }}>KisanSaathi</div>
+            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, letterSpacing: 2, textTransform: "uppercase" }}>Farmer Advisory Platform</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ textAlign: "right", display: "flex", alignItems: "center", gap: 12 }}>
             <div>
-              <div style={{ color: "#fff", fontSize: 12, opacity: 0.8 }}>📍 Pune, Maharashtra</div>
+            <div style={{ color: "#fff", fontSize: 12, opacity: 0.8 }}>📍 {dashWeather?.location?.region || "Andhra Pradesh"} </div>
               <div style={{ color: theme.wheat, fontSize: 11 }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</div>
             </div>
-            <select value={language} onChange={e => setLanguage(e.target.value)}
+           {showFarmModal && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: "rgba(0,0,0,0.45)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 9999
+    }}
+  >
+    <div
+      style={{
+        background: "#fff",
+        width: 420,
+        borderRadius: 16,
+        padding: 24,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+      }}
+    >
+      <h3 style={{ marginTop: 0 }}>
+        🌾 Update Farm Details
+      </h3>
 
-              style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "6px 10px", fontSize: 12, cursor: "pointer", outline: "none" }}>
-              {Object.keys(translations).map(lang => (
-                <option key={lang} value={lang} style={{ background: theme.leaf, color: "#fff" }}>{lang}</option>
-              ))}
-            </select>
+      <div style={{ marginBottom: 12 }}>
+        <label>Crop</label>
+
+        <select
+          value={farmProfile.crop}
+          onChange={(e) =>
+            setFarmProfile({
+              ...farmProfile,
+              crop: e.target.value
+            })
+          }
+          style={{
+            width: "100%",
+            padding: 10,
+            marginTop: 6
+          }}
+        >
+          <option>Rice</option>
+          <option>Wheat</option>
+          <option>Cotton</option>
+          <option>Maize</option>
+          <option>Sugarcane</option>
+          <option>Tomato</option>
+          <option>Soybean</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: 18 }}>
+        <label>Sowing Date</label>
+
+        <input
+          type="date"
+          value={farmProfile.sowingDate}
+          max={new Date().toISOString().split("T")[0]}
+          onChange={(e) =>
+            setFarmProfile({
+              ...farmProfile,
+              sowingDate: e.target.value
+            })
+          }
+          style={{
+            width: "100%",
+            padding: 10,
+            marginTop: 6
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: 10
+        }}
+      >
+        <button
+          onClick={() => setShowFarmModal(false)}
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={saveFarmProfile}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
         {/* ADD LOGOUT BUTTON HERE */}
         <button
           onClick={logout}
@@ -2461,7 +2843,7 @@ Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, 
 
               </div>
               <div style={{ fontSize: 14, opacity: 0.85, maxWidth: 500 }}>
-                {t.welcomeMsg}
+                Your complete farming companion — weather, markets, crops, disease detection & government schemes in one place.
               </div>
               {dashWeather && <div style={{ marginTop: 8, fontSize: 18 }}>📍 {dashWeather.current.temp_c}°C · {dashWeather.current.condition.text}</div>}
               <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
@@ -2494,14 +2876,13 @@ Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, 
 
             {/* Quick Stats */}
             <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>📌 {t.todayOverview}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>📌 Today's Overview</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
                 {[
-                  { label: t.tempLabel, value: dashWeather ? `${dashWeather.current.temp_c}°C` : `${weatherData.current.temp}°C`, icon: "🌡️", sub: dashWeather ? `${t.feelsLike} ${dashWeather.current.feelslike_c}°C` : `${t.feelsLike} ${weatherData.current.feels}°C`, color: "#e3f2fd", border: "#90caf9" },
-                  { label: t.humidity, value: dashWeather ? `${dashWeather.current.humidity}%` : `${weatherData.current.humidity}%`, icon: "💧", sub: dashWeather ? dashWeather.current.condition.text : t.moderate, color: "#e0f7fa", border: "#80deea" },
-                  { label: t.windSpeed, value: dashWeather ? `${dashWeather.current.wind_kph} km/h` : `${weatherData.current.wind} km/h`, icon: "💨", sub: t.liveData, color: "#f3e5f5", border: "#ce93d8" },
-                  { label: t.wheatPrice, value: `₹${dashPrices[0]?.price || marketPrices[0].price}`, icon: "🌾", sub: dashLoading ? t.updating : `${dashPrices[0]?.change >= 0 ? "▲" : "▼"}₹${Math.abs(dashPrices[0]?.change || marketPrices[0].change)} today`, color: "#fff8e1", border: "#ffe082" },
-                  { label: t.activeSchemes, value: "4", icon: "🏛️", sub: t.youreEligible, color: "#e8f5e9", border: "#a5d6a7" },
+                  { label: "Temperature", value: dashWeather ? `${dashWeather.current.temp_c}°C` : `${weatherData.current.temp}°C`, icon: "🌡️", sub: dashWeather ? `Feels ${dashWeather.current.feelslike_c}°C` : `Feels ${weatherData.current.feels}°C`, color: "#e3f2fd", border: "#90caf9" },
+                  { label: "Humidity", value: dashWeather ? `${dashWeather.current.humidity}%` : `${weatherData.current.humidity}%`, icon: "💧", sub: dashWeather ? dashWeather.current.condition.text : "Moderate", color: "#e0f7fa", border: "#80deea" },
+                  { label: "Wind Speed", value: dashWeather ? `${dashWeather.current.wind_kph} km/h` : `${weatherData.current.wind} km/h`, icon: "💨", sub: "Live data", color: "#f3e5f5", border: "#ce93d8" },
+                
                 ].map((s, i) => (
                   <div key={i} className="card-hover" style={{ background: s.color, borderRadius: 16, border: `1.5px solid ${s.border}`, padding: "18px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", cursor: "default" }}>
                     <div style={{ fontSize: 28, marginBottom: 8 }}>{s.icon}</div>
@@ -2512,17 +2893,24 @@ Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, 
                 ))}
               </div>
             </div>
+            {/* Smart Farm Insights */}
+        <SmartFarmInsights
+  conditions={conditions}
+  crop={farmProfile.crop}
+  currentStage={
+    getCropStage(
+      farmProfile.crop,
+      farmProfile.sowingDate
+    )?.currentStage
+  }
+/>
 
-          
-
-
-
-            {/* Weather + Market Row */}
+            {/* 7-Day Forecast + Crop Stage Tracker */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-              {/* Weather mini */}
+              {/* Weather mini / 7-Day Forecast */}
               <div style={{ background: `linear-gradient(135deg, #1565c0, #42a5f5)`, borderRadius: 18, padding: 22, color: "#fff", boxShadow: "0 4px 20px rgba(21,101,192,0.3)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700 }}>🌤️ {t.forecastLabel}</div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700 }}>🌤️ 7-Day Forecast</div>
                   <div style={{ fontSize: 11, opacity: 0.7, background: "rgba(255,255,255,0.2)", borderRadius: 10, padding: "3px 10px" }}>Live</div>
                 </div>
                 <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
@@ -2547,60 +2935,28 @@ Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, 
                 </div>
               </div>
 
-              {/* Market Prices */}
-              <div style={{ background: theme.card, borderRadius: 18, border: `1px solid ${theme.border}`, padding: 22, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, fontWeight: 700 }}>📊 Market Prices {dashLoading && <span style={{ fontSize: 11, color: theme.muted }}>updating...</span>}</div>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button onClick={autoRefreshPrices} disabled={dashLoading} style={{ fontSize: 11, color: "#1565c0", background: "#e3f2fd", border: "none", borderRadius: 10, padding: "4px 10px", cursor: "pointer", fontWeight: 700 }}>{t.refresh}</button>
-                    <button onClick={() => setActiveTab("market")} style={{ fontSize: 11, color: theme.leaf, background: "#e8f5e9", border: "none", borderRadius: 10, padding: "4px 10px", cursor: "pointer", fontWeight: 700 }}>{t.viewAll}</button>
-                  </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {dashPrices.slice(0, 5).map((m, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: i % 2 === 0 ? "#fafaf6" : "#fff", borderRadius: 10 }}>
-                      <span style={{ fontSize: 13, color: theme.soil, fontWeight: 600 }}>🌾 {m.crop}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {m.trend && <Sparkline data={m.trend} color={m.change >= 0 ? "#4caf50" : "#f44336"} />}
-                        <span style={{ fontSize: 13, fontWeight: 700, color: theme.soil }}><div style={{ textAlign: "right" }}>
-  <div
-    style={{
-      fontWeight: 700,
-      fontSize: 15,
-      color: theme.soil
-    }}
-  >
-    ₹{(m.price / 100).toFixed(2)}/kg
-  </div>
-
-  <div
-    style={{
-      fontsize: 11,
-      color: theme.muted
-    }}
-  >
-    ₹{m.price}/qtl
-  </div>
-</div></span>
-                        <span style={{ fontSize: 11, color: m.change >= 0 ? "#2e7d32" : theme.red, fontWeight: 700, background: m.change >= 0 ? "#e8f5e9" : "#fce4ec", borderRadius: 6, padding: "2px 6px" }}>{m.change >= 0 ? "▲" : "▼"}{Math.abs(m.change)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* Crop Stage Tracker */}
+             <CropStageTracker
+  crop={farmProfile.crop}
+  sowingDate={farmProfile.sowingDate}
+onEdit={() => {
+  console.log("Edit clicked");
+  setShowFarmModal(true);
+}}
+/>
             </div>
 
             {/* Quick Actions */}
             <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>⚡ {t.quickActions}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>⚡ Quick Actions</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
                 {[
-                  { icon: "🔬", label: t.disease, tab: "disease", color: "#fce4ec", border: "#f48fb1" },
-                  { icon: "🌱", label: t.crops, tab: "crops", color: "#e8f5e9", border: "#a5d6a7" },
-                  { icon: "🏛️", label: t.schemes, tab: "schemes", color: "#ede7f6", border: "#ce93d8" },
-                  { icon: "🤖", label: t.advisor, tab: "advisor", color: "#e3f2fd", border: "#90caf9" },
-                  { icon: "📈", label: t.market, tab: "market", color: "#fff8e1", border: "#ffe082" },
-                  { icon: "🌤️", label: t.weather, tab: "weather", color: "#e0f7fa", border: "#80deea" },
+                  { icon: "🔬", label: "Disease", tab: "disease", color: "#fce4ec", border: "#f48fb1" },
+                  { icon: "🌱", label: "Crops", tab: "crops", color: "#e8f5e9", border: "#a5d6a7" },
+                  { icon: "🏛️", label: "Schemes", tab: "schemes", color: "#ede7f6", border: "#ce93d8" },
+                  { icon: "🤖", label: "AI Advisor", tab: "advisor", color: "#e3f2fd", border: "#90caf9" },
+                  { icon: "📈", label: "Market", tab: "market", color: "#fff8e1", border: "#ffe082" },
+                  { icon: "🌤️", label: "Weather", tab: "weather", color: "#e0f7fa", border: "#80deea" },
                 ].map((a, i) => (
                   <div key={i} className="card-hover" onClick={() => setActiveTab(a.tab)}
                     style={{ background: a.color, border: `1.5px solid ${a.border}`, borderRadius: 14, padding: "18px 14px", textAlign: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
@@ -2611,79 +2967,56 @@ Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, 
               </div>
             </div>
 
-            {/* Eligible Schemes */}
+            {/* Farm Task Checklist / Today's Tasks */}
             <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>🏛️ Your Eligible Schemes</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
-                {governmentSchemes.filter(s => s.eligible).map((s, i) => (
-                  <div key={i} className="card-hover" style={{ background: "linear-gradient(135deg, #f0fff4, #e8f5e9)", border: "1.5px solid #a5d6a7", borderRadius: 14, padding: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                      <div style={{ fontWeight: 700, color: "#2e7d32", fontSize: 15 }}>{s.name}</div>
-                      <span style={{ fontSize: 10, background: "#2e7d32", color: "#fff", borderRadius: 6, padding: "2px 8px", fontWeight: 700 }}>✅ Eligible</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: theme.muted, marginBottom: 8 }}>{s.desc}</div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 11, background: "#e8f5e9", color: "#2e7d32", borderRadius: 6, padding: "2px 8px", fontWeight: 600 }}>{s.category}</span>
-                      <span style={{ fontSize: 11, color: theme.muted }}>📅 {s.deadline}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>✅ Today's Farm Tasks</div>
+              <FarmTaskChecklist />
             </div>
 
-            {/* Farm Task Checklist */}
-            <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>✅ {t.todayTasks}</div>
-              <FarmTaskChecklist t={t} />
-            </div>
-
-            {/* Crop Calendar + Poll Row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-              <CropCalendar t={t} />
-              <HarvestPoll t={t} />
-            </div>
+            {/* Crop Calendar */}
+            <CropCalendar />
 
           </div>
         )}
 
         {/* WEATHER TAB */}
         {activeTab === "weather" && (
-          <WeatherTab t={t} />
+          <WeatherTab />
         )}
            {/* MARKET TAB */}
         {activeTab === "market" && (
-          <MarketTab t={t} language={language}  authFetch={authFetch}/>
+          <MarketTab authFetch={authFetch}/>
         )}
  
         {/* CROPS TAB */}
-        {activeTab === "crops" && <CropRecommender t={t} language={language} authFetch={authFetch} />}
+        {activeTab === "crops" && <CropRecommender authFetch={authFetch} />}
  
         {/* DISEASE TAB */}
-        {activeTab === "disease" && <DiseaseAnalyzer t={t} language={language} authFetch={authFetch} />}
+        {activeTab === "disease" && <DiseaseAnalyzer authFetch={authFetch} />}
  
         {/* SCHEMES TAB */}
         {activeTab === "schemes" && (
-          <SchemesTab t={t} language={language} authFetch={authFetch}/>
+          <SchemesTab authFetch={authFetch}/>
         )}
  
         {/* YIELD PREDICTOR TAB */}
-        {activeTab === "yield" && <YieldPredictor language={language} t={t} authFetch={authFetch}/>}
+        {activeTab === "yield" && <YieldPredictor />}
 
         {/* SOIL ANALYZER TAB */}
-        {activeTab === "soil" && <SoilAnalyzer language={language} t={t} authFetch={authFetch}/>}
+        {activeTab === "soil" && <SoilAnalyzer authFetch={authFetch}/>}
 
         {/* MANDI FINDER TAB */}
-        {activeTab === "mandi" && <MandiFinder language={language} t={t} authFetch={authFetch}/>}
+        {activeTab === "mandi" && <MandiFinder />}
 
         {/* SEED CALCULATOR TAB */}
-        {activeTab === "seed" && <SeedCalculator language={language} t={t} authFetch={authFetch}/>}
+        {activeTab === "seed" && <SeedCalculator />}
 
         {/* AI ADVISOR TAB */}
         {activeTab === "advisor" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div style={{ background: "#e8f5e9", border: "1px solid #a5d6a7", borderRadius: 12, padding: "14px 18px", fontSize: 13, color: "#2e7d32" }}>
-              🤖 Ask anything in English, Hindi, Telugu, Tamil or any Indian language. The AI understands you!            </div>
-            <AIAdvisor t={t} language={language} authFetch={authFetch}/>
+              🤖 Ask me anything about crops, diseases, or schemes!            </div>
+            <AIAdvisor authFetch={authFetch}/>
             <div style={{ background: theme.card, borderRadius: 14, border: `1px solid ${theme.border}`, padding: 18 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: theme.bark, marginBottom: 10 }}>💬 Try asking:</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
