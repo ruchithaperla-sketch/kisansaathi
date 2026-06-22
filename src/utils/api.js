@@ -6,7 +6,7 @@
  *   const res = await apiChat(authFetch, prompt);
  */
 
-const BASE = process.env.REACT_APP_API_URL || "http://localhost:3001";
+const BASE = process.env.REACT_APP_API_URL ;
 
 export async function apiChat(authFetch, prompt) {
   const res = await authFetch("/api/chat", {

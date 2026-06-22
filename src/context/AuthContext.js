@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const register = useCallback(async (formData) => {
-    const res = await fetch(`${process.env.react_app_api_url || "http://localhost:3001"}/api/auth/register`, {
+   const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -47,8 +47,8 @@ export function AuthProvider({ children }) {
   }, [persistSession]);
 
   const login = useCallback(async ({ email, password, rememberMe }) => {
-    const res = await fetch(`${process.env.react_app_api_url || "http://localhost:3001"}/api/auth/login`, {
-      method: "POST",
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
+     method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, rememberMe }),
     });
@@ -63,8 +63,7 @@ export function AuthProvider({ children }) {
   }, [persistSession]);
 
   const authFetch = useCallback(async (url, options = {}) => {
-    const res = await fetch(`${process.env.react_app_api_url || "http://localhost:3001"}${url}`, {
-      ...options,
+   const res = await fetch(`${process.env.REACT_APP_API_URL}${url}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
