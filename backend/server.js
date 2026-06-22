@@ -498,7 +498,12 @@ app.delete(
     }
   }
 );
-
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "KisanSaathi Backend Running 🚀"
+  });
+});
 
 app.listen(process.env.PORT || 3001, () => {
   console.log(`✅ KisanSaathi server running on port ${process.env.PORT || 3001}`);
