@@ -2902,6 +2902,7 @@ const totalCost =
   export default function KisanSaathiDashboard() {
   const { authFetch, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [loading, setLoading] = useState(false);
  {/* const [language, setLanguage] = useState("English");
   const t = translations[language] || translations.English;
   */  }
