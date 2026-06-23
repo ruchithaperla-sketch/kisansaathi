@@ -1208,7 +1208,7 @@ function SchemesTab({ t, language, authFetch }) {
   const [state, setState] = useState("Andhra Pradesh");
   const [category, setCategory] = useState("All");
   const [aiSchemes, setAiSchemes] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   
 
   const [search, setSearch] = useState("");
@@ -1392,7 +1392,7 @@ function SchemesTab({ t, language, authFetch }) {
 function MarketTab({ t, language, authFetch }) {
   
   const [prices, setPrices] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [state, setState] = useState("Andhra Pradesh");
   const [tip, setTip] = useState("");
   const [priceAlert, setPriceAlert] = useState({});
@@ -1600,7 +1600,7 @@ function fetchPrices() {
 function WeatherTab({ t }) {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [error, setError] = useState("");
 
   async function getWeather() {
@@ -1692,7 +1692,7 @@ function AIAdvisor({ t, language, authFetch }) {
     { role: "assistant", text: "Namaste! 🌾 I'm your AI Farm Advisor. Ask me anything!" }
   ]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const bottomRef = useRef(null);
  
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
@@ -1763,7 +1763,7 @@ function AIAdvisor({ t, language, authFetch }) {
 function DiseaseAnalyzer({ t, language, authFetch }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [selected, setSelected] = useState(null);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -2048,7 +2048,7 @@ function YieldPredictor({ language, t, authFetch }) {
   const [soil, setSoil] = useState("");
   const [season, setSeason] = useState("Kharif");
   const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   async function predict() {
 
@@ -2225,7 +2225,7 @@ function SoilAnalyzer({ language, t, authFetch }) {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [manualSoil, setManualSoil] = useState("");
   const fileRef = useRef(null);
   const soilKnowledge = {
@@ -2465,7 +2465,7 @@ function MandiFinder({ language, t, authFetch }) {
   
   const [state, setState] = useState("");
   const [mandis, setMandis] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
  async function findMandis() {
 
   if (!state) return;
@@ -2587,7 +2587,7 @@ function SeedCalculator({ language, t, authFetch }) {
   const [land, setLand] = useState("");
   const [method, setMethod] = useState("Transplanting");
   const [result, setResult] = useState("null");
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const cropData = {
   Rice: {
     seedRate: 20,
@@ -2902,8 +2902,12 @@ const totalCost =
   export default function KisanSaathiDashboard() {
   const { authFetch, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [language, setLanguage] = useState("English");
+ {/* const [language, setLanguage] = useState("English");
   const t = translations[language] || translations.English;
+  */  }
+const language = "English";
+const t = translations.English;
+
 
   const [dashWeather, setDashWeather] = useState(null);
   const [dashLocation, setDashLocation] = useState("Visakhapatnam");
@@ -3004,13 +3008,18 @@ const conditions = useMemo(
             <div style={{ color: "#fff", fontSize: 12, opacity: 0.8 }}>📍 {dashWeather?.location?.region || "Andhra Pradesh"} </div>
               <div style={{ color: theme.wheat, fontSize: 11 }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</div>
             </div>
-            <select value={language} onChange={e => setLanguage(e.target.value)}
+       {/* Language selector removed
 
-              style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "6px 10px", fontSize: 12, cursor: "pointer", outline: "none" }}>
-              {Object.keys(translations).map(lang => (
-                <option key={lang} value={lang} style={{ background: theme.leaf, color: "#fff" }}>{lang}</option>
-              ))}
-            </select>
+<select value={language} onChange={e => setLanguage(e.target.value)}
+  style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "6px 10px", fontSize: 12, cursor: "pointer", outline: "none" }}>
+  {Object.keys(translations).map(lang => (
+    <option key={lang} value={lang} style={{ background: theme.leaf, color: "#fff" }}>
+      {lang}
+    </option>
+  ))}
+</select>
+
+*/}
            {showFarmModal && (
   <div
     style={{
