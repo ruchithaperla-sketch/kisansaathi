@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "./context/AuthContext";
 import { apiChat, apiAnalyzeImage } from "./utils/api";
 
- 
-const API_KEY = ""; // handled by proxy
 const languageNativeName = {
   English: "English",
   Hindi: "Hindi (हिंदी)",
@@ -412,30 +410,6 @@ const governmentSchemes = [
   { name: "PKVY", desc: "Paramparagat Krishi Vikas Yojana for organic farming support.", category: "Organic", deadline: "Mar 31, 2026", eligible: false },
 ];
  
-const cropRecommendations = {
-  Kharif: {
-    Sandy: ["Groundnut", "Pearl Millet", "Moth Bean"],
-    Loamy: ["Rice", "Maize", "Cotton", "Sugarcane"],
-    Clay: ["Rice", "Jute", "Taro"],
-    Black: ["Cotton", "Soybean", "Pigeonpea"],
-    Red: ["Groundnut", "Finger Millet", "Horsegram"],
-  },
-  Rabi: {
-    Sandy: ["Mustard", "Barley", "Gram"],
-    Loamy: ["Wheat", "Potato", "Peas", "Mustard"],
-    Clay: ["Wheat", "Barley", "Chickpea"],
-    Black: ["Wheat", "Chickpea", "Linseed"],
-    Red: ["Wheat", "Lentil", "Sunflower"],
-  },
-  Zaid: {
-    Sandy: ["Watermelon", "Muskmelon", "Cucumber"],
-    Loamy: ["Vegetables", "Moong Bean", "Bitter Gourd"],
-    Clay: ["Fodder crops", "Moong Bean"],
-    Black: ["Moong Bean", "Urd Bean"],
-    Red: ["Groundnut", "Sunflower"],
-  },
-};
- 
 const diseases = [
   { name: "Blast (Rice)", symptoms: "Spindle-shaped lesions on leaves with gray centers and brown margins.", treatment: "Spray Tricyclazole 75 WP @ 0.6 g/L. Remove infected debris.", severity: "High" },
   { name: "Powdery Mildew", symptoms: "White powdery coating on leaves and stems.", treatment: "Apply Sulphur 80 WP @ 2.5 g/L or Tebuconazole 25 EC @ 1 mL/L.", severity: "Medium" },
@@ -733,6 +707,7 @@ function CircularProgress({ percentage, size = 140, strokeWidth = 12, color = "#
 }
 
 // ── Sparkline Component ──────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 function Sparkline({ data, color }) {
   const min = Math.min(...data), max = Math.max(...data);
   const w = 80, h = 30, pad = 2;
@@ -843,6 +818,7 @@ function CropCalendar({ t = translations.English }) {
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 function HarvestPoll({ t = translations.English }) {
   const [voted, setVoted] = useState(null);
   const [votes, setVotes] = useState({ excellent: 142, good: 89, average: 34, poor: 12 });
@@ -907,6 +883,8 @@ function SmartFarmInsights({ conditions,crop,currentStage }) {
       diseaseRisk.level
     ),
   [
+    crop,
+    currentStage,
     conditions.temp,
     conditions.humidity,
     conditions.heavyRain,
@@ -1134,6 +1112,7 @@ const stagePct =
 
 
 
+// eslint-disable-next-line no-unused-vars
 function FarmProfileCard() {
   const [crop, setCrop] = useState(
     localStorage.getItem("crop") || ""
@@ -2925,13 +2904,9 @@ const totalCost =
   const [activeTab, setActiveTab] = useState("dashboard");
   const [language, setLanguage] = useState("English");
   const t = translations[language] || translations.English;
-console.log("Language:", language, "tempLabel:", translations[language]?.tempLabel);
 
-  const [priceAlert, setPriceAlert] = useState({});
   const [dashWeather, setDashWeather] = useState(null);
-  const [dashPrices, setDashPrices] = useState(marketPrices);
   const [dashLocation, setDashLocation] = useState("Visakhapatnam");
-  const [dashLoading, setDashLoading] = useState(false);
 
   const [farmProfile, setFarmProfile] = useState({
   crop: localStorage.getItem("crop") || "Rice",
@@ -2977,53 +2952,14 @@ const conditions = useMemo(
           const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=8b00faec197b4af3aa195603260306&q=${latitude},${longitude}&days=7&aqi=no&alerts=no`);
           const data = await res.json();
           if (!data.error) {
-            console.log(data.location);
             setDashWeather(data);
             setDashLocation(data.location.name);
           }
         } catch {}
       });
     }
-    const fetchOnce = async () => {
-      setDashLoading(true);
-      try {
-        const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
-        const raw = await apiChat(authFetch, `Generate realistic Indian mandi prices for today ${today}. Return ONLY a valid JSON array. No explanation. No markdown. Just raw JSON.
-Format: [{"crop":"Wheat","price":2200,"change":45,"unit":"quintal"},...]
-Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, Chilli. Vary prices slightly.`);
-        const rawstr = typeof raw === "object" ? JSON.stringify(raw) : (raw || "[]");
-        const clean = rawstr.replace(/```json|```|`/g, "").trim();
-        const jsonMatch = clean.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.length) setDashPrices(parsed);
-        }
-      } catch {}
-      setDashLoading(false);
-    };
-    fetchOnce();
-    const interval = setInterval(fetchOnce, 1800000);
-    return () => clearInterval(interval);
   }, []);
 
-  async function autoRefreshPrices() {
-    setDashLoading(true);
-    try {
-      const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
-      const raw = await apiChat(authFetch, `Generate realistic Indian mandi prices for today ${today}. Return ONLY a valid JSON array. No explanation. No markdown. Just raw JSON.
-Format: [{"crop":"Wheat","price":2200,"change":45,"unit":"quintal"},...]
-Include: Wheat, Rice, Tomato, Onion, Potato, Cotton, Soybean, Maize, Groundnut, Chilli. Vary prices slightly.`);
-      const rawstr = typeof raw === "object" ? JSON.stringify(raw) : (raw || "[]");
-        const clean = rawstr.replace(/```json|```|`/g, "").trim();
-      const jsonMatch = clean.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        if (parsed.length) setDashPrices(parsed);
-      }
-    } catch {}
-    setDashLoading(false);
-  }
- 
   const tabs = [
     { id: "dashboard", label: t.dashboard, icon: "🏠" },
     { id: "weather", label: t.weather, icon: "🌤️" },
