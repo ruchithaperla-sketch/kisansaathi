@@ -13,10 +13,13 @@ const Notification = require("./models/Notification");
 
 const app = express();
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "https://kisansaathi-8nj924xnc-ruchithaperla-9570s-projects.vercel.app"
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.options(/.*/, cors());
 app.use(express.json({ limit: "10mb" }));
