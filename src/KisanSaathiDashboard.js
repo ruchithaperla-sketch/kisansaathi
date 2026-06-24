@@ -771,11 +771,11 @@ function FarmTaskChecklist({ t = translations.English }) {
           </div>
         ))}
       </div>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 8 }}>
         <input value={newTask} onChange={e => setNewTask(e.target.value)} onKeyDown={e => e.key === "Enter" && addTask()}
           placeholder={t.addTaskPlaceholder}
-          style={{ flex: 1, minWidth: 0, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "9px 14px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif" }} />
-        <button onClick={addTask} style={{ background: theme.leaf, color: "#fff", border: "none", borderRadius: 10, padding: "9px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0 }}>{t.addTask}</button>
+          style={{ flex: 1, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "9px 14px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif" }} />
+        <button onClick={addTask} style={{ background: theme.leaf, color: "#fff", border: "none", borderRadius: 10, padding: "9px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{t.addTask}</button>
       </div>
     </div>
   );
@@ -921,7 +921,7 @@ function SmartFarmInsights({ conditions,crop,currentStage }) {
   return (
     <div>
       <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>🧠 Smart Farm Insights</div>
-      <div className="ks-insights-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 16 }}>
 
         {/* Crop Health Score */}
         <div className="card-hover" style={{ ...cardStyle, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
@@ -1025,64 +1025,46 @@ const stagePct =
   );
 
   return (
-    <div className="card-hover" style={{ background: theme.card, borderRadius: 18, border: `1px solid ${theme.border}`, padding: 22, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
- 
-    <div
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16
-  }}
->
-  <div
-    style={{
-      fontFamily: "'Playfair Display', serif",
-      fontSize: 16,
-      color: theme.soil,
-      fontWeight: 700
-    }}
-  >
-    🌾 Crop Stage Tracker
-  </div>
+    <div className="card-hover" style={{ background: theme.card, borderRadius: 18, border: `1px solid ${theme.border}`, padding: 22, boxShadow: "0 4px 16px rgba(0,0,0,0.06)", overflow: "hidden" }}>
 
-  <button
-    onClick={() => {
-      console.log("Edit clicked");
-      onEdit && onEdit();
-    }}
-    style={{
-      border: "none",
-      background: "#f5f5f5",
-      borderRadius: 8,
-      padding: "6px 10px",
-      cursor: "pointer"
-    }}
-  >
-    ⚙️ Edit
-  </button>
-</div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 10, color: theme.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Current Crop</div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: theme.soil, marginTop: 2 }}>🌾 {crop}</div>
+      {/* Header row: title + edit button always visible */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, gap: 8 }}>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, fontWeight: 700, minWidth: 0 }}>
+          🌾 Crop Stage Tracker
         </div>
-        <div>
+        <button
+          onClick={() => { onEdit && onEdit(); }}
+          style={{ border: "none", background: theme.leaf, color: "#fff", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", flexShrink: 0, fontFamily: "'Lato', sans-serif" }}
+        >
+          ⚙️ Edit
+        </button>
+      </div>
+
+      {/* Crop + Stage info: stack on mobile */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: 120, background: "#f5f0e8", borderRadius: 10, padding: "10px 12px", border: `1px solid ${theme.border}` }}>
+          <div style={{ fontSize: 10, color: theme.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Current Crop</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: theme.soil, marginTop: 4 }}>🌾 {crop}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: 120, background: "#e8f5e9", borderRadius: 10, padding: "10px 12px", border: "1px solid #c8e6c9" }}>
           <div style={{ fontSize: 10, color: theme.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Current Stage</div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: theme.leaf, marginTop: 2 }}>{data.currentStage}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: theme.leaf, marginTop: 4 }}>{data.currentStage}</div>
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "flex-start", marginBottom: 18 }}>
-        {data.stages.map((stage, i) => (
-          <React.Fragment key={stage}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 56 }}>
-              <div style={{ width: 14, height: 14, borderRadius: "50%", background: i <= data.currentIndex ? theme.leaf : "#e0e0e0", border: `2px solid ${i === data.currentIndex ? theme.leaf : "#ddd"}`, boxShadow: i === data.currentIndex ? "0 0 0 4px rgba(74,124,89,0.15)" : "none" }} />
-              <div style={{ fontSize: 10, marginTop: 6, color: i === data.currentIndex ? theme.leaf : theme.muted, fontWeight: i === data.currentIndex ? 700 : 400, textAlign: "center" }}>{stage}</div>
-            </div>
-            {i < data.stages.length - 1 && <div style={{ flex: 1, height: 3, background: i < data.currentIndex ? theme.leaf : "#e0e0e0", marginTop: 6 }} />}
-          </React.Fragment>
-        ))}
+      {/* Stage progress dots — scrollable on mobile */}
+      <div style={{ overflowX: "auto", paddingBottom: 4, marginBottom: 18 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", minWidth: "max-content" }}>
+          {data.stages.map((stage, i) => (
+            <React.Fragment key={stage}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 56 }}>
+                <div style={{ width: 14, height: 14, borderRadius: "50%", background: i <= data.currentIndex ? theme.leaf : "#e0e0e0", border: `2px solid ${i === data.currentIndex ? theme.leaf : "#ddd"}`, boxShadow: i === data.currentIndex ? "0 0 0 4px rgba(74,124,89,0.15)" : "none" }} />
+                <div style={{ fontSize: 10, marginTop: 6, color: i === data.currentIndex ? theme.leaf : theme.muted, fontWeight: i === data.currentIndex ? 700 : 400, textAlign: "center" }}>{stage}</div>
+              </div>
+              {i < data.stages.length - 1 && <div style={{ flex: 1, height: 3, background: i < data.currentIndex ? theme.leaf : "#e0e0e0", marginTop: 6, minWidth: 20 }} />}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
 
       <div style={{ height: 8, background: "#eee", borderRadius: 4, marginBottom: 16, overflow: "hidden" }}>
@@ -1357,15 +1339,15 @@ function SchemesTab({ t, language, authFetch }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {filteredSchemes.map((s, i) => (
             <div key={i} className="card-hover" style={{ borderRadius: 14, border: `2px solid ${s.eligible ? "#a5d6a7" : theme.border}`, padding: 18, background: s.eligible ? "#f9fffe" : "#fafaf6", cursor: "default", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-              <div className="ks-scheme-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 16, color: theme.soil, fontFamily: "'Playfair Display', serif" }}>{s.name}</div>
                   <div style={{ fontSize: 13, color: theme.muted, marginTop: 4, maxWidth: 500 }}>{s.desc}</div>
                 </div>
                 {s.eligible ? (
-                  <span className="ks-scheme-badge" style={{ background: "#e8f5e9", color: "#2e7d32", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", marginLeft: 12, flexShrink: 0 }}>✅ {t.eligible}</span>
+                  <span style={{ background: "#e8f5e9", color: "#2e7d32", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", marginLeft: 12 }}>✅ {t.eligible}</span>
                 ) : (
-                  <span className="ks-scheme-badge" style={{ background: "#fce4ec", color: "#c62828", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", marginLeft: 12, flexShrink: 0 }}>❌ {t.notEligible}</span>
+                  <span style={{ background: "#fce4ec", color: "#c62828", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", marginLeft: 12 }}>❌ {t.notEligible}</span>
                 )}
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 12, alignItems: "center" }}>
@@ -1480,8 +1462,7 @@ function fetchPrices() {
         )}
 
         {prices.length > 0 && (
-          <div className="ks-market-table-wrap">
-          <div className="ks-market-table" style={{ border: `1px solid ${theme.border}`, borderRadius: 12, overflow: "hidden" }}>
+          <div style={{ border: `1px solid ${theme.border}`, borderRadius: 12, overflow: "hidden" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 80px", padding: "10px 16px", background: theme.soil, color: "#fff", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
               <span>Crop</span>
               <span style={{ textAlign: "right" }}>Price (₹/qtl | ₹/kg)</span>
@@ -1522,7 +1503,6 @@ function fetchPrices() {
                 </div>
               </div>
             ))}
-          </div>
           </div>
         )}
 
@@ -1625,12 +1605,12 @@ function WeatherTab({ t }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 12 }}>🌦️ {t.weatherTitle}</div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 10 }}>
           <input value={city} onChange={e => setCity(e.target.value)} onKeyDown={e => e.key === "Enter" && getWeather()}
             placeholder={t.weatherPlaceholder}
-            style={{ flex: 1, minWidth: 0, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "10px 16px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif" }} />
+            style={{ flex: 1, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "10px 16px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif" }} />
           <button onClick={getWeather} disabled={loading}
-            style={{ background: "#1565c0", color: "#fff", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Lato', sans-serif", flexShrink: 0 }}>
+            style={{ background: "#1565c0", color: "#fff", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Lato', sans-serif" }}>
             {loading ? t.loading : `🔍 ${t.searchBtn}`}
           </button>
         </div>
@@ -1640,15 +1620,15 @@ function WeatherTab({ t }) {
       {weather && (
         <>
           <div style={{ background: `linear-gradient(135deg, #1565c0, #42a5f5, #80deea)`, borderRadius: 20, padding: 28, color: "#fff" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 13, opacity: 0.8, marginBottom: 4 }}>📍 {weather.location.name}, {weather.location.region}</div>
-                <div className="ks-weather-current-temp" style={{ fontSize: 64, fontWeight: 300, lineHeight: 1 }}>{weather.current.temp_c}°</div>
+                <div style={{ fontSize: 64, fontWeight: 300, lineHeight: 1 }}>{weather.current.temp_c}°</div>
                 <div style={{ fontSize: 18, opacity: 0.9, marginTop: 4 }}>{weather.current.condition.text}</div>
               </div>
               <img src={weather.current.condition.icon} alt="weather" style={{ width: 80, height: 80 }} />
             </div>
-            <div className="ks-weather-stats-row" style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.3)", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.3)" }}>
               {[{ label: "Feels Like", val: `${weather.current.feelslike_c}°C` }, { label: t.humidity, val: `${weather.current.humidity}%` }, { label: "Wind", val: `${weather.current.wind_kph} km/h` }].map((s, i) => (
                 <div key={i}><div style={{ opacity: 0.7, fontSize: 12 }}>{s.label}</div><div style={{ fontWeight: 700, fontSize: 16 }}>{s.val}</div></div>
               ))}
@@ -1657,7 +1637,7 @@ function WeatherTab({ t }) {
 
           <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 16 }}>{t.forecastLabel}</div>
-            <div className="ks-forecast-7day" style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8, overflowX: "auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8 }}>
               {weather.forecast.forecastday.map((f, i) => (
                 <div key={i} style={{ textAlign: "center", background: "#f5f5f5", borderRadius: 12, padding: 12 }}>
                   <div style={{ fontSize: 11, color: theme.muted, marginBottom: 6, fontWeight: 700 }}>{new Date(f.date).toLocaleDateString("en-IN", { weekday: "short" })}</div>
@@ -1745,15 +1725,15 @@ function AIAdvisor({ t, language, authFetch }) {
         )}
         <div ref={bottomRef} />
       </div>
-      <div style={{ padding: "12px 16px", borderTop: `1px solid ${theme.border}`, display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ padding: "12px 16px", borderTop: `1px solid ${theme.border}`, display: "flex", gap: 8 }}>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && send()}
           placeholder={t.chatPlaceholder}
-          style={{ flex: 1, minWidth: 0, border: `1px solid ${theme.border}`, borderRadius: 24, padding: "9px 16px", fontSize: 13, outline: "none", background: "#fafaf6", fontFamily: "'Lato', sans-serif", color: theme.soil }}
+          style={{ flex: 1, border: `1px solid ${theme.border}`, borderRadius: 24, padding: "9px 16px", fontSize: 13, outline: "none", background: "#fafaf6", fontFamily: "'Lato', sans-serif", color: theme.soil }}
         />
-        <button onClick={send} disabled={loading} style={{ background: theme.leaf, color: "#fff", border: "none", borderRadius: 24, padding: "9px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Lato', sans-serif", flexShrink: 0 }}>
+        <button onClick={send} disabled={loading} style={{ background: theme.leaf, color: "#fff", border: "none", borderRadius: 24, padding: "9px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Lato', sans-serif" }}>
           {t.sendBtn}
         </button>
       </div>
@@ -1925,7 +1905,7 @@ setAiTips(localTips[crop] || "Local recommendation available.");
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: theme.soil, marginBottom: 6 }}>🌱 {t.cropTitle}</div>
         <p style={{ fontSize: 13, color: theme.muted, marginBottom: 16 }}>Enter your crop, soil type and season to get AI-powered farming tips.</p>
 
-        <div className="ks-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
           <div>
             <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: theme.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Crop Name</label>
             <select value={crop} onChange={e => setCrop(e.target.value)} style={{ width: "100%", border: `1px solid ${theme.border}`, borderRadius: 10, padding: "10px 16px", fontSize: 13, outline: "none", background: "#fafaf6", color: theme.soil, fontFamily: "'Lato', sans-serif", boxSizing: "border-box" }}>
@@ -2139,7 +2119,7 @@ Note: These are estimated values based on standard agricultural data.
       </div>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div className="ks-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: theme.muted, marginBottom: 6, textTransform: "uppercase" }}>Crop Name</label>
             <select
@@ -2505,7 +2485,7 @@ function MandiFinder({ language, t, authFetch }) {
       </div>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 24 }}>
         <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: theme.muted, marginBottom: 8, textTransform: "uppercase" }}>{t.locationLabel}</label>
-        <div className="ks-mandi-row" style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
          <select
   value={state}
   onChange={(e) => setState(e.target.value)}
@@ -2518,8 +2498,7 @@ function MandiFinder({ language, t, authFetch }) {
     outline: "none",
     background: "#fafaf6",
     color: theme.soil,
-    fontFamily: "'Lato', sans-serif",
-    width: "100%"
+    fontFamily: "'Lato', sans-serif"
   }}
 >
 <option value="">Select State</option>
@@ -2535,7 +2514,6 @@ function MandiFinder({ language, t, authFetch }) {
   
 </select>
           <button onClick={findMandis} disabled={loading || !state}
-            className="ks-mandi-btn"
             style={{ background: "#1a237e", color: "#fff", border: "none", borderRadius: 10, padding: "12px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
             {loading ? t.findingBtn : t.findMandisBtn}
           </button>
@@ -2765,7 +2743,7 @@ const totalCost =
       </div>
       <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div className="ks-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: theme.muted, marginBottom: 6, textTransform: "uppercase" }}>Crop Name</label>
               <select
@@ -2989,142 +2967,27 @@ const conditions = useMemo(
   
  
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f0e8", fontFamily: "'Lato', sans-serif", overflowX: "hidden", width: "100%" }}>
+    <div style={{ minHeight: "100vh", background: "#f5f0e8", fontFamily: "'Lato', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important; transition: all 0.2s; }
-
-        /* ── GLOBAL MOBILE RESET ── */
-        html, body { overflow-x: hidden; width: 100%; }
-        img { max-width: 100%; height: auto; }
-
-        /* ── HEADER ── */
-        .ks-header { padding: 12px 16px !important; flex-wrap: wrap; gap: 8px; }
-        .ks-header-logo-text { font-size: 18px !important; }
-        .ks-header-tagline { display: none; }
-        .ks-header-right { gap: 8px !important; }
-        .ks-header-location { display: none; }
-
-        /* ── NAV TABS ── */
-        .ks-nav { scrollbar-width: none; -ms-overflow-style: none; }
-        .ks-nav::-webkit-scrollbar { display: none; }
-        .ks-nav-btn { padding: 10px 12px !important; font-size: 12px !important; }
-
-        /* hamburger toggle */
-        .ks-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; font-size: 22px; color: #4a7c59; }
-
-        /* ── CONTENT WRAPPER ── */
-        .ks-content { padding: 16px 12px !important; }
-
-        /* ── HERO BANNER ── */
-        .ks-hero { padding: 20px 18px !important; border-radius: 16px !important; }
-        .ks-hero-title { font-size: 20px !important; }
-        .ks-hero-watermark { display: none; }
-        .ks-hero-btns { gap: 8px !important; }
-        .ks-hero-btn { padding: 6px 12px !important; font-size: 11px !important; }
-
-        /* ── DASHBOARD GRID: 7-day + crop stage ── */
-        .ks-forecast-crop-grid { grid-template-columns: 1fr !important; }
-
-        /* ── QUICK STATS CARDS ── */
-        .ks-stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important; gap: 10px !important; }
-
-        /* ── SMART FARM INSIGHTS ── */
-        .ks-insights-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
-
-        /* ── QUICK ACTIONS ── */
-        .ks-actions-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
-
-        /* ── WEATHER TAB: 7-day forecast ── */
-        .ks-forecast-7day { grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; }
-        .ks-weather-current-temp { font-size: 48px !important; }
-        .ks-weather-stats-row { gap: 14px !important; flex-wrap: wrap; }
-
-        /* ── MARKET TAB: price table ── */
-        .ks-market-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
-        .ks-market-table { min-width: 480px; }
-
-        /* ── YIELD PREDICTOR & SEED CALC: 2-col form ── */
-        .ks-form-2col { grid-template-columns: 1fr !important; }
-
-        /* ── SCHEMES: eligible badge ── */
-        .ks-scheme-row { flex-wrap: wrap; gap: 8px; }
-        .ks-scheme-badge { margin-left: 0 !important; }
-
-        /* ── ADMIN: sidebar + content ── */
-        .ks-admin-layout { flex-direction: column !important; }
-        .ks-admin-sidebar { width: 100% !important; }
-
-        /* ── MANDI FINDER ── */
-        .ks-mandi-row { flex-direction: column !important; }
-        .ks-mandi-btn { width: 100% !important; }
-
-        /* ── AI ADVISOR chat input ── */
-        .ks-chat-input-row { flex-wrap: nowrap; }
-
-        /* ── FARM MODAL ── */
-        .ks-modal-box { width: calc(100vw - 32px) !important; max-width: 420px; }
-
-        /* ── TABLET (768px) ── */
-        @media (max-width: 768px) {
-          .ks-header-tagline { display: none; }
-          .ks-forecast-7day { grid-template-columns: repeat(4, 1fr) !important; }
-          .ks-forecast-crop-grid { grid-template-columns: 1fr !important; }
-          .ks-insights-grid { grid-template-columns: 1fr 1fr !important; }
-          .ks-actions-grid { grid-template-columns: repeat(3, 1fr) !important; }
-        }
-
-        /* ── MOBILE (425px and below) ── */
-        @media (max-width: 425px) {
-          .ks-header { padding: 10px 12px !important; }
-          .ks-header-logo-text { font-size: 16px !important; }
-          .ks-content { padding: 12px 10px !important; }
-          .ks-hero { padding: 16px 14px !important; }
-          .ks-hero-title { font-size: 18px !important; }
-          .ks-stats-grid { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important; }
-          .ks-forecast-7day { grid-template-columns: repeat(4, minmax(52px, 1fr)) !important; overflow-x: auto; }
-          .ks-insights-grid { grid-template-columns: 1fr !important; }
-          .ks-actions-grid { grid-template-columns: repeat(3, 1fr) !important; }
-          .ks-form-2col { grid-template-columns: 1fr !important; }
-          .ks-nav-btn { padding: 9px 10px !important; font-size: 11px !important; }
-          .ks-weather-current-temp { font-size: 42px !important; }
-        }
-
-        /* ── SMALL MOBILE (375px) ── */
-        @media (max-width: 375px) {
-          .ks-header-location { display: none; }
-          .ks-actions-grid { grid-template-columns: repeat(3, 1fr) !important; }
-          .ks-stats-grid { grid-template-columns: 1fr 1fr !important; }
-        }
-
-        /* ── TINY (320px) ── */
-        @media (max-width: 320px) {
-          .ks-header { padding: 8px 10px !important; }
-          .ks-content { padding: 10px 8px !important; }
-          .ks-hero { padding: 14px 12px !important; border-radius: 12px !important; }
-          .ks-hero-title { font-size: 16px !important; }
-          .ks-actions-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .ks-stats-grid { grid-template-columns: 1fr !important; }
-          .ks-forecast-7day { grid-template-columns: repeat(4, minmax(48px, 1fr)) !important; }
-          .ks-nav-btn { padding: 8px 8px !important; font-size: 10px !important; }
-        }
       `}</style>
  
       {/* Header */}
-      <div className="ks-header" style={{ background: theme.leaf, padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
+      <div style={{ background: theme.leaf, padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 30 }}>🌾</span>
           <div>
-            <div className="ks-header-logo-text" style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" }}>{t.appName}</div>
-            <div className="ks-header-tagline" style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, letterSpacing: 2, textTransform: "uppercase" }}>{t.tagline}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" }}>{t.appName}</div>
+            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, letterSpacing: 2, textTransform: "uppercase" }}>{t.tagline}</div>
           </div>
         </div>
-        <div className="ks-header-right" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ textAlign: "right", display: "flex", alignItems: "center", gap: 12 }}>
-            <div className="ks-header-location">
+            <div>
             <div style={{ color: "#fff", fontSize: 12, opacity: 0.8 }}>📍 {dashWeather?.location?.region || "Andhra Pradesh"} </div>
               <div style={{ color: theme.wheat, fontSize: 11 }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</div>
             </div>
@@ -3156,7 +3019,6 @@ const conditions = useMemo(
     }}
   >
     <div
-      className="ks-modal-box"
       style={{
         background: "#fff",
         width: 420,
@@ -3262,10 +3124,9 @@ const conditions = useMemo(
       </div>
  
       {/* Nav Tabs */}
-      <div className="ks-nav" style={{ background: "#fff", borderBottom: `1px solid ${theme.border}`, overflowX: "auto", display: "flex" }}>
+      <div style={{ background: "#fff", borderBottom: `1px solid ${theme.border}`, overflowX: "auto", display: "flex" }}>
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className="ks-nav-btn"
             style={{ padding: "12px 18px", border: "none", background: "none", cursor: "pointer", fontSize: 13, fontWeight: activeTab === tab.id ? 700 : 400, color: activeTab === tab.id ? theme.leaf : theme.muted, borderBottom: activeTab === tab.id ? `3px solid ${theme.leaf}` : "3px solid transparent", whiteSpace: "nowrap", fontFamily: "'Lato', sans-serif", transition: "all 0.2s" }}>
             {tab.icon} {tab.label}
           </button>
@@ -3273,17 +3134,17 @@ const conditions = useMemo(
       </div>
  
       {/* Content */}
-      <div className="ks-content" style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px", animation: "fadeIn 0.3s ease" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px", animation: "fadeIn 0.3s ease" }}>
  
         {/* DASHBOARD */}
         {activeTab === "dashboard" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
             {/* Hero Welcome Banner */}
-            <div className="ks-hero" style={{ background: `linear-gradient(135deg, ${theme.leaf} 0%, #2d5a3d 100%)`, borderRadius: 20, padding: "28px 32px", color: "#fff", position: "relative", overflow: "hidden" }}>
-              <div className="ks-hero-watermark" style={{ position: "absolute", right: 20, top: 10, fontSize: 80, opacity: 0.1 }}>🌾</div>
+            <div style={{ background: `linear-gradient(135deg, ${theme.leaf} 0%, #2d5a3d 100%)`, borderRadius: 20, padding: "28px 32px", color: "#fff", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", right: 20, top: 10, fontSize: 80, opacity: 0.1 }}>🌾</div>
               <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>📅 {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · 📍 {dashLocation}</div>
-              <div className="ks-hero-title" style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 900, marginBottom: 6 }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 900, marginBottom: 6 }}>
                 Welcome to KisanSaathi 🌾
 
               </div>
@@ -3291,10 +3152,9 @@ const conditions = useMemo(
                 {t.welcomeMsg}
               </div>
               {dashWeather && <div style={{ marginTop: 8, fontSize: 18 }}>📍 {dashWeather.current.temp_c}°C · {dashWeather.current.condition.text}</div>}
-              <div className="ks-hero-btns" style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
                 {["🌤️ Check Weather", "📊 Market Prices", "🌱 Crop Tips", "🔬 Disease Check"].map((btn, i) => (
                   <button key={i} onClick={() => setActiveTab(["weather","market","crops","disease"][i])}
-                    className="ks-hero-btn"
                     style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 20, padding: "7px 16px", fontSize: 12, color: "#fff", cursor: "pointer", fontWeight: 600, fontFamily: "'Lato', sans-serif" }}>
                     {btn}
                   </button>
@@ -3323,7 +3183,7 @@ const conditions = useMemo(
             {/* Quick Stats */}
             <div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>📌 {t.todayOverview}</div>
-              <div className="ks-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
                 {[
                   { label: t.tempLabel, value: dashWeather ? `${dashWeather.current.temp_c}°C` : `${weatherData.current.temp}°C`, icon: "🌡️", sub: dashWeather ? `${t.feelsLike} ${dashWeather.current.feelslike_c}°C` : `${t.feelsLike} ${weatherData.current.feels}°C`, color: "#e3f2fd", border: "#90caf9" },
                   { label: t.humidity, value: dashWeather ? `${dashWeather.current.humidity}%` : `${weatherData.current.humidity}%`, icon: "💧", sub: dashWeather ? dashWeather.current.condition.text : t.moderate, color: "#e0f7fa", border: "#80deea" },
@@ -3352,7 +3212,7 @@ const conditions = useMemo(
 />
 
             {/* 7-Day Forecast + Crop Stage Tracker */}
-            <div className="ks-forecast-crop-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               {/* Weather mini / 7-Day Forecast */}
               <div style={{ background: `linear-gradient(135deg, #1565c0, #42a5f5)`, borderRadius: 18, padding: 22, color: "#fff", boxShadow: "0 4px 20px rgba(21,101,192,0.3)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -3395,7 +3255,7 @@ onEdit={() => {
             {/* Quick Actions */}
             <div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>⚡ {t.quickActions}</div>
-              <div className="ks-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
                 {[
                   { icon: "🔬", label: t.disease, tab: "disease", color: "#fce4ec", border: "#f48fb1" },
                   { icon: "🌱", label: t.crops, tab: "crops", color: "#e8f5e9", border: "#a5d6a7" },
@@ -3467,7 +3327,7 @@ onEdit={() => {
               <div style={{ fontSize: 13, fontWeight: 700, color: theme.bark, marginBottom: 10 }}>💬 Try asking:</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {["What should I sow in June on black soil?", "How to treat yellowing rice leaves?", "Best time to sell onions this month?", "Which govt scheme gives free seeds?", "How much water does wheat need?"].map((q, i) => (
-                  <span key={i} style={{ background: "#f0f7f0", border: "1px solid #c8e6c9", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#2e7d32", cursor: "pointer", wordBreak: "break-word" }}>{q}</span>
+                  <span key={i} style={{ background: "#f0f7f0", border: "1px solid #c8e6c9", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#2e7d32", cursor: "pointer" }}>{q}</span>
                 ))}
               </div>
             </div>
@@ -3551,14 +3411,12 @@ function AdminDashboard() {
       </div>
 
       <div
-        className="ks-admin-layout"
         style={{display: "flex",gap: 20,alignItems: "flex-start"
         }}
       >
 
         {/* Sidebar */}
         <div
-          className="ks-admin-sidebar"
           style={{ width: 260, background: "#fff", borderRadius: 16, padding: 20, border: "1px solid #ddd", height: "fit-content"
           }}
         >
