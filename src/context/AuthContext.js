@@ -46,6 +46,8 @@ export function AuthProvider({ children }) {
     return data;
   }, [persistSession]);
 
+  console.log("API URL:", process.env.REACT_APP_API_URL);
+
   const login = useCallback(async ({ email, password, rememberMe }) => {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
      method: "POST",
