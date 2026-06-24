@@ -921,7 +921,7 @@ function SmartFarmInsights({ conditions,crop,currentStage }) {
   return (
     <div>
       <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>🧠 Smart Farm Insights</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 16 }}>
+      <div className="ks-insights-grid">
 
         {/* Crop Health Score */}
         <div className="card-hover" style={{ ...cardStyle, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
@@ -1462,7 +1462,8 @@ function fetchPrices() {
         )}
 
         {prices.length > 0 && (
-          <div style={{ border: `1px solid ${theme.border}`, borderRadius: 12, overflow: "hidden" }}>
+          <div className="ks-table-scroll">
+          <div style={{ border:`1px solid ${theme.border}`, borderRadius:12, overflow:"hidden", minWidth:460 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 80px", padding: "10px 16px", background: theme.soil, color: "#fff", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
               <span>Crop</span>
               <span style={{ textAlign: "right" }}>Price (₹/qtl | ₹/kg)</span>
@@ -1503,6 +1504,7 @@ function fetchPrices() {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         )}
 
@@ -1619,25 +1621,25 @@ function WeatherTab({ t }) {
 
       {weather && (
         <>
-          <div style={{ background: `linear-gradient(135deg, #1565c0, #42a5f5, #80deea)`, borderRadius: 20, padding: 28, color: "#fff" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div style={{ background:"linear-gradient(135deg,#1565c0,#42a5f5,#80deea)", borderRadius:20, padding:24, color:"#fff" }}>
+            <div className="ks-weather-current">
               <div>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 13, opacity: 0.8, marginBottom: 4 }}>📍 {weather.location.name}, {weather.location.region}</div>
-                <div style={{ fontSize: 64, fontWeight: 300, lineHeight: 1 }}>{weather.current.temp_c}°</div>
-                <div style={{ fontSize: 18, opacity: 0.9, marginTop: 4 }}>{weather.current.condition.text}</div>
+                <div style={{ fontFamily:"'Playfair Display',serif", fontSize:13, opacity:.8, marginBottom:4 }}>📍 {weather.location.name}, {weather.location.region}</div>
+                <div className="ks-weather-temp">{weather.current.temp_c}°</div>
+                <div style={{ fontSize:17, opacity:.9, marginTop:4 }}>{weather.current.condition.text}</div>
               </div>
-              <img src={weather.current.condition.icon} alt="weather" style={{ width: 80, height: 80 }} />
+              <img src={weather.current.condition.icon} alt="weather" style={{ width:80, height:80 }} />
             </div>
-            <div style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.3)" }}>
-              {[{ label: "Feels Like", val: `${weather.current.feelslike_c}°C` }, { label: t.humidity, val: `${weather.current.humidity}%` }, { label: "Wind", val: `${weather.current.wind_kph} km/h` }].map((s, i) => (
-                <div key={i}><div style={{ opacity: 0.7, fontSize: 12 }}>{s.label}</div><div style={{ fontWeight: 700, fontSize: 16 }}>{s.val}</div></div>
+            <div className="ks-weather-stats">
+              {[{ label:"Feels Like", val:`${weather.current.feelslike_c}°C` }, { label:t.humidity, val:`${weather.current.humidity}%` }, { label:"Wind", val:`${weather.current.wind_kph} km/h` }].map((s,i) => (
+                <div key={i}><div style={{ opacity:.7, fontSize:12 }}>{s.label}</div><div style={{ fontWeight:700, fontSize:16 }}>{s.val}</div></div>
               ))}
             </div>
           </div>
 
           <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 16 }}>{t.forecastLabel}</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8 }}>
+            <div className="ks-forecast-scroll" style={{ padding:"4px 0" }}>
               {weather.forecast.forecastday.map((f, i) => (
                 <div key={i} style={{ textAlign: "center", background: "#f5f5f5", borderRadius: 12, padding: 12 }}>
                   <div style={{ fontSize: 11, color: theme.muted, marginBottom: 6, fontWeight: 700 }}>{new Date(f.date).toLocaleDateString("en-IN", { weekday: "short" })}</div>
@@ -2966,316 +2968,408 @@ const conditions = useMemo(
 
   
  
+  const [navOpen, setNavOpen] = useState(false);
+
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f0e8", fontFamily: "'Lato', sans-serif" }}>
+    <div className="ks-root">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important; transition: all 0.2s; }
+
+        /* ── RESET ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { overflow-x: hidden; width: 100%; -webkit-text-size-adjust: 100%; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeIn  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulse   { 0%,100% { opacity:.3; } 50% { opacity:1; } }
+
+        /* ── CARD HOVER (desktop only) ── */
+        @media (hover: hover) {
+          .card-hover:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.12) !important; transition:all .2s ease; }
+        }
+
+        /* ── GLOBAL ROOT ── */
+        .ks-root { min-height:100vh; background:#f5f0e8; font-family:"Lato",sans-serif; overflow-x:hidden; width:100%; }
+
+        /* ── HEADER ── */
+        .ks-header { background:#4a7c59; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 12px rgba(0,0,0,.15); position:sticky; top:0; z-index:100; gap:8px; }
+        .ks-header-logo { display:flex; align-items:center; gap:10px; min-width:0; }
+        .ks-header-logo-icon { font-size:26px; flex-shrink:0; }
+        .ks-header-logo-name { font-family:"Playfair Display",serif; font-size:20px; font-weight:900; color:#fff; letter-spacing:-.5px; white-space:nowrap; }
+        .ks-header-logo-tag  { color:rgba(255,255,255,.7); font-size:10px; letter-spacing:2px; text-transform:uppercase; white-space:nowrap; }
+        .ks-header-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+        .ks-header-location { text-align:right; }
+        .ks-header-location-state { color:#fff; font-size:12px; opacity:.85; }
+        .ks-header-location-date  { font-size:10px; color:#c8e6c9; }
+        .ks-logout-btn { background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:8px; padding:7px 13px; font-size:12px; cursor:pointer; font-weight:600; font-family:"Lato",sans-serif; white-space:nowrap; flex-shrink:0; touch-action:manipulation; }
+
+        /* ── HAMBURGER ── */
+        .ks-hamburger { display:none; background:none; border:none; cursor:pointer; padding:6px; font-size:24px; color:#fff; line-height:1; touch-action:manipulation; }
+
+        /* ── NAV (desktop) ── */
+        .ks-nav-bar { background:#fff; border-bottom:1px solid #e0d8cc; display:flex; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; }
+        .ks-nav-bar::-webkit-scrollbar { display:none; }
+        .ks-nav-btn { padding:13px 16px; border:none; background:none; cursor:pointer; font-size:13px; font-family:"Lato",sans-serif; white-space:nowrap; transition:all .2s; touch-action:manipulation; border-bottom:3px solid transparent; flex-shrink:0; }
+        .ks-nav-btn.active { font-weight:700; color:#4a7c59; border-bottom-color:#4a7c59; }
+        .ks-nav-btn:not(.active) { font-weight:400; color:#8d7f6b; }
+
+        /* ── MOBILE NAV DRAWER ── */
+        .ks-nav-drawer { display:none; }
+
+        /* ── CONTENT ── */
+        .ks-content { max-width:1100px; margin:0 auto; padding:16px 14px 32px; animation:fadeIn .3s ease; }
+
+        /* ── HERO BANNER ── */
+        .ks-hero { border-radius:18px; padding:22px 20px; color:#fff; position:relative; overflow:hidden; }
+        .ks-hero-watermark { position:absolute; right:12px; top:6px; font-size:70px; opacity:.08; pointer-events:none; }
+        .ks-hero-date { font-size:12px; opacity:.8; margin-bottom:4px; }
+        .ks-hero-title { font-family:"Playfair Display",serif; font-size:24px; font-weight:900; margin-bottom:6px; line-height:1.2; }
+        .ks-hero-desc { font-size:13px; opacity:.85; max-width:480px; line-height:1.5; }
+        .ks-hero-temp { margin-top:8px; font-size:16px; }
+        .ks-hero-btns { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+        .ks-hero-btn { background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); border-radius:20px; padding:7px 14px; font-size:12px; color:#fff; cursor:pointer; font-weight:600; font-family:"Lato",sans-serif; touch-action:manipulation; white-space:nowrap; }
+
+        /* ── ALERT BANNERS ── */
+        .ks-alert { background:#fff8dc; padding:12px 14px; border-radius:12px; border:1px solid #f0d98a; font-size:13px; line-height:1.5; }
+
+        /* ── SECTION TITLE ── */
+        .ks-section-title { font-family:"Playfair Display",serif; font-size:16px; font-weight:700; margin-bottom:12px; }
+
+        /* ── STATS GRID ── */
+        .ks-stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+        .ks-stat-card { border-radius:14px; border-width:1.5px; border-style:solid; padding:16px 14px; }
+        .ks-stat-icon { font-size:26px; margin-bottom:8px; }
+        .ks-stat-label { font-size:10px; text-transform:uppercase; letter-spacing:1.2px; font-weight:700; margin-bottom:3px; }
+        .ks-stat-value { font-family:"Playfair Display",serif; font-size:22px; font-weight:700; }
+        .ks-stat-sub { font-size:11px; margin-top:4px; font-weight:600; }
+
+        /* ── FORECAST + CROP TRACKER GRID ── */
+        .ks-forecast-crop-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }
+
+        /* ── FORECAST CARD ── */
+        .ks-forecast-card { border-radius:18px; padding:20px; color:#fff; box-shadow:0 4px 20px rgba(21,101,192,.25); }
+        .ks-forecast-scroll { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+        .ks-forecast-scroll::-webkit-scrollbar { display:none; }
+        .ks-forecast-day { text-align:center; min-width:50px; flex-shrink:0; background:rgba(255,255,255,.15); border-radius:12px; padding:10px 6px; }
+        .ks-forecast-day-name  { font-size:10px; opacity:.8; margin-bottom:5px; font-weight:700; }
+        .ks-forecast-day-high  { font-size:13px; font-weight:700; margin-top:3px; }
+        .ks-forecast-day-low   { font-size:10px; opacity:.7; }
+        .ks-forecast-day-rain  { font-size:10px; opacity:.8; margin-top:3px; background:rgba(255,255,255,.2); border-radius:6px; padding:2px 4px; }
+
+        /* ── QUICK ACTIONS ── */
+        .ks-actions-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+        .ks-action-card { border-radius:14px; border-width:1.5px; border-style:solid; padding:18px 10px; text-align:center; cursor:pointer; transition:all .15s ease; touch-action:manipulation; }
+        .ks-action-icon { font-size:28px; margin-bottom:8px; }
+        .ks-action-label { font-size:12px; font-weight:700; font-family:"Lato",sans-serif; }
+
+        /* ── INSIGHTS GRID ── */
+        .ks-insights-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+
+        /* ── FORM CONTROLS ── */
+        .ks-input, .ks-select { width:100%; border:1px solid #ddd5c0; border-radius:10px; padding:11px 14px; font-size:13px; outline:none; background:#fafaf6; color:#5c4a2a; font-family:"Lato",sans-serif; -webkit-appearance:none; appearance:none; }
+        .ks-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238d7f6b' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; }
+        .ks-btn { border:none; border-radius:10px; padding:12px 20px; font-weight:700; font-size:13px; cursor:pointer; font-family:"Lato",sans-serif; touch-action:manipulation; transition:opacity .15s; }
+        .ks-btn:disabled { opacity:.55; cursor:default; }
+        .ks-btn-primary { background:#4a7c59; color:#fff; }
+        .ks-btn-block { display:block; width:100%; padding:13px; font-size:14px; }
+        .ks-form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .ks-form-group { display:flex; flex-direction:column; gap:6px; }
+        .ks-label { font-size:11px; font-weight:700; color:#8d7f6b; text-transform:uppercase; letter-spacing:.8px; }
+
+        /* ── TABLE SCROLL WRAPPER ── */
+        .ks-table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; }
+        .ks-table-scroll table { min-width:480px; }
+
+        /* ── WEATHER TAB ── */
+        .ks-weather-current { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; }
+        .ks-weather-temp { font-size:60px; font-weight:300; line-height:1; }
+        .ks-weather-stats { display:flex; gap:20px; margin-top:18px; padding-top:18px; border-top:1px solid rgba(255,255,255,.3); flex-wrap:wrap; }
+
+        /* ── ADMIN LAYOUT ── */
+        .ks-admin-layout { display:flex; gap:20px; align-items:flex-start; }
+        .ks-admin-sidebar { width:260px; flex-shrink:0; background:#fff; border-radius:16px; padding:20px; border:1px solid #ddd; }
+
+        /* ── MODAL ── */
+        .ks-modal-box { background:#fff; width:min(420px,calc(100vw - 32px)); border-radius:16px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,.22); }
+        .ks-modal-btns { display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+
+        /* ── MANDI / SCHEME ROW ── */
+        .ks-card-header-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; }
+        .ks-badge { border-radius:8px; padding:4px 12px; font-size:12px; font-weight:700; white-space:nowrap; flex-shrink:0; }
+
+        /* ══════════════════════════════════════════
+           RESPONSIVE BREAKPOINTS
+        ══════════════════════════════════════════ */
+
+        /* ── TABLET 1024px ── */
+        @media (max-width:1024px) {
+          .ks-actions-grid { grid-template-columns:repeat(3,1fr); }
+          .ks-insights-grid { grid-template-columns:repeat(2,1fr); }
+        }
+
+        /* ── TABLET 768px ── */
+        @media (max-width:768px) {
+          /* Header */
+          .ks-header-logo-name { font-size:18px; }
+          .ks-header-location-date { display:none; }
+
+          /* Nav → hamburger on mobile */
+          .ks-hamburger { display:block; }
+          .ks-nav-bar { display:none; }
+          .ks-nav-drawer { display:flex; flex-direction:column; background:#fff; border-bottom:1px solid #e0d8cc; animation:slideDown .2s ease; }
+          .ks-nav-drawer.hidden { display:none; }
+          .ks-nav-drawer .ks-nav-btn { padding:14px 20px; border-bottom:1px solid #f5f0e8; font-size:14px; text-align:left; border-right:none; }
+          .ks-nav-drawer .ks-nav-btn.active { background:#f0f7f0; border-left:4px solid #4a7c59; }
+
+          /* Content */
+          .ks-content { padding:12px 12px 28px; }
+
+          /* Hero */
+          .ks-hero { padding:18px 16px; border-radius:14px; }
+          .ks-hero-title { font-size:20px; }
+          .ks-hero-watermark { display:none; }
+
+          /* Forecast + Crop: single column */
+          .ks-forecast-crop-grid { grid-template-columns:1fr; }
+
+          /* Stats: 2 cols on tablet */
+          .ks-stats-grid { grid-template-columns:repeat(2,1fr); }
+
+          /* Actions: 2 cols */
+          .ks-actions-grid { grid-template-columns:repeat(2,1fr); }
+
+          /* Insights: 1 col */
+          .ks-insights-grid { grid-template-columns:1fr 1fr; }
+
+          /* Admin */
+          .ks-admin-layout { flex-direction:column; }
+          .ks-admin-sidebar { width:100%; }
+
+          /* Weather */
+          .ks-weather-temp { font-size:48px; }
+
+          /* Form rows → single col */
+          .ks-form-row { grid-template-columns:1fr; }
+        }
+
+        /* ── MOBILE 600px ── */
+        @media (max-width:600px) {
+          .ks-header-logo-tag { display:none; }
+          .ks-hero-title { font-size:19px; }
+          .ks-insights-grid { grid-template-columns:1fr; }
+          .ks-stat-value { font-size:20px; }
+          .ks-section-title { font-size:15px; }
+        }
+
+        /* ── MOBILE 480px ── */
+        @media (max-width:480px) {
+          .ks-header { padding:10px 12px; }
+          .ks-header-logo-icon { font-size:22px; }
+          .ks-header-logo-name { font-size:17px; }
+          .ks-header-location { display:none; }
+          .ks-logout-btn { padding:6px 10px; font-size:11px; }
+          .ks-content { padding:10px 10px 24px; }
+          .ks-hero { padding:16px 14px; border-radius:12px; }
+          .ks-hero-title { font-size:18px; }
+          .ks-hero-desc { font-size:12px; }
+          .ks-stats-grid { grid-template-columns:repeat(3,1fr); gap:8px; }
+          .ks-stat-icon { font-size:22px; }
+          .ks-stat-label { font-size:9px; }
+          .ks-stat-value { font-size:18px; }
+          .ks-stat-sub { font-size:10px; }
+          .ks-stat-card { padding:12px 10px; }
+          .ks-weather-temp { font-size:42px; }
+          .ks-forecast-crop-grid { gap:12px; }
+        }
+
+        /* ── SMALL MOBILE 320px ── */
+        @media (max-width:360px) {
+          .ks-header-logo-name { font-size:15px; }
+          .ks-hero-title { font-size:16px; }
+          .ks-stats-grid { grid-template-columns:1fr 1fr; gap:8px; }
+          .ks-actions-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+          .ks-hero-btns { gap:6px; }
+          .ks-hero-btn { padding:6px 10px; font-size:11px; }
+          .ks-action-icon { font-size:24px; }
+          .ks-action-label { font-size:11px; }
+        }
       `}</style>
  
-      {/* Header */}
-      <div style={{ background: theme.leaf, padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 30 }}>🌾</span>
+      {/* ── HEADER ── */}
+      <div className="ks-header">
+        <div className="ks-header-logo">
+          <span className="ks-header-logo-icon">🌾</span>
           <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" }}>{t.appName}</div>
-            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, letterSpacing: 2, textTransform: "uppercase" }}>{t.tagline}</div>
+            <div className="ks-header-logo-name">{t.appName}</div>
+            <div className="ks-header-logo-tag">{t.tagline}</div>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ textAlign: "right", display: "flex", alignItems: "center", gap: 12 }}>
-            <div>
-            <div style={{ color: "#fff", fontSize: 12, opacity: 0.8 }}>📍 {dashWeather?.location?.region || "Andhra Pradesh"} </div>
-              <div style={{ color: theme.wheat, fontSize: 11 }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</div>
+        <div className="ks-header-right">
+          <div className="ks-header-location">
+            <div className="ks-header-location-state">📍 {dashWeather?.location?.region || "Andhra Pradesh"}</div>
+            <div className="ks-header-location-date">{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</div>
+          </div>
+          <button className="ks-logout-btn" onClick={logout}>🚪 Logout</button>
+          {/* Hamburger — visible on mobile only */}
+          <button className="ks-hamburger" onClick={() => setNavOpen(o => !o)} aria-label="Menu">
+            {navOpen ? "✕" : "☰"}
+          </button>
+        </div>
+      </div>
+      {/* ── FARM MODAL ── */}
+      {showFarmModal && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.45)", display:"flex", justifyContent:"center", alignItems:"center", zIndex:9999, padding:"16px" }}>
+          <div className="ks-modal-box">
+            <h3 style={{ marginTop:0, marginBottom:16, fontFamily:"'Playfair Display',serif", color:"#5c4a2a" }}>🌾 Update Farm Details</h3>
+            <div className="ks-form-group" style={{ marginBottom:14 }}>
+              <label className="ks-label">Crop</label>
+              <select className="ks-select" value={farmProfile.crop}
+                onChange={e => setFarmProfile({ ...farmProfile, crop: e.target.value })}>
+                {["Rice","Wheat","Cotton","Maize","Sugarcane","Tomato","Soybean"].map(c => <option key={c}>{c}</option>)}
+              </select>
             </div>
-       {/* Language selector removed
-
-<select value={language} onChange={e => setLanguage(e.target.value)}
-  style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "6px 10px", fontSize: 12, cursor: "pointer", outline: "none" }}>
-  {Object.keys(translations).map(lang => (
-    <option key={lang} value={lang} style={{ background: theme.leaf, color: "#fff" }}>
-      {lang}
-    </option>
-  ))}
-</select>
-
-*/}
-           {showFarmModal && (
-  <div
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "rgba(0,0,0,0.45)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 9999
-    }}
-  >
-    <div
-      style={{
-        background: "#fff",
-        width: 420,
-        borderRadius: 16,
-        padding: 24,
-        boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
-      }}
-    >
-      <h3 style={{ marginTop: 0 }}>
-        🌾 Update Farm Details
-      </h3>
-
-      <div style={{ marginBottom: 12 }}>
-        <label>Crop</label>
-
-        <select
-          value={farmProfile.crop}
-          onChange={(e) =>
-            setFarmProfile({
-              ...farmProfile,
-              crop: e.target.value
-            })
-          }
-          style={{
-            width: "100%",
-            padding: 10,
-            marginTop: 6
-          }}
-        >
-          <option>Rice</option>
-          <option>Wheat</option>
-          <option>Cotton</option>
-          <option>Maize</option>
-          <option>Sugarcane</option>
-          <option>Tomato</option>
-          <option>Soybean</option>
-        </select>
-      </div>
-
-      <div style={{ marginBottom: 18 }}>
-        <label>Sowing Date</label>
-
-        <input
-          type="date"
-          value={farmProfile.sowingDate}
-          max={new Date().toISOString().split("T")[0]}
-          onChange={(e) =>
-            setFarmProfile({
-              ...farmProfile,
-              sowingDate: e.target.value
-            })
-          }
-          style={{
-            width: "100%",
-            padding: 10,
-            marginTop: 6
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: 10
-        }}
-      >
-        <button
-          onClick={() => setShowFarmModal(false)}
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={saveFarmProfile}
-        >
-          Save
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-        {/* ADD LOGOUT BUTTON HERE */}
-        <button
-          onClick={logout}
-          style={{
-            background: "rgba(255,255,255,0.15)",
-            color: "#fff",
-            border: "1px solid rgba(255,255,255,0.4)",
-            borderRadius: 8,
-            padding: "6px 14px",
-            fontSize: 12,
-            cursor: "pointer",
-            fontWeight: 600,
-            fontFamily: "'Lato', sans-serif",
-          }}
-        >
-          🚪 Logout
-        </button>
+            <div className="ks-form-group" style={{ marginBottom:20 }}>
+              <label className="ks-label">Sowing Date</label>
+              <input type="date" className="ks-input" value={farmProfile.sowingDate}
+                max={new Date().toISOString().split("T")[0]}
+                onChange={e => setFarmProfile({ ...farmProfile, sowingDate: e.target.value })} />
+            </div>
+            <div className="ks-modal-btns">
+              <button className="ks-btn" style={{ background:"#f5f0e8", color:"#5c4a2a", border:"1px solid #ddd5c0" }} onClick={() => setShowFarmModal(false)}>Cancel</button>
+              <button className="ks-btn ks-btn-primary" onClick={saveFarmProfile}>Save</button>
+            </div>
           </div>
         </div>
-      </div>
- 
-      {/* Nav Tabs */}
-      <div style={{ background: "#fff", borderBottom: `1px solid ${theme.border}`, overflowX: "auto", display: "flex" }}>
+      )}
+
+      {/* ── DESKTOP NAV ── */}
+      <div className="ks-nav-bar">
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            style={{ padding: "12px 18px", border: "none", background: "none", cursor: "pointer", fontSize: 13, fontWeight: activeTab === tab.id ? 700 : 400, color: activeTab === tab.id ? theme.leaf : theme.muted, borderBottom: activeTab === tab.id ? `3px solid ${theme.leaf}` : "3px solid transparent", whiteSpace: "nowrap", fontFamily: "'Lato', sans-serif", transition: "all 0.2s" }}>
+            className={`ks-nav-btn${activeTab === tab.id ? " active" : ""}`}>
             {tab.icon} {tab.label}
           </button>
         ))}
       </div>
- 
-      {/* Content */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px", animation: "fadeIn 0.3s ease" }}>
- 
-        {/* DASHBOARD */}
+
+      {/* ── MOBILE NAV DRAWER ── */}
+      <div className={`ks-nav-drawer${navOpen ? "" : " hidden"}`}>
+        {tabs.map(tab => (
+          <button key={tab.id}
+            className={`ks-nav-btn${activeTab === tab.id ? " active" : ""}`}
+            onClick={() => { setActiveTab(tab.id); setNavOpen(false); }}>
+            {tab.icon} {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── MAIN CONTENT ── */}
+      <div className="ks-content">
+
+        {/* ══ DASHBOARD TAB ══ */}
         {activeTab === "dashboard" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
 
-            {/* Hero Welcome Banner */}
-            <div style={{ background: `linear-gradient(135deg, ${theme.leaf} 0%, #2d5a3d 100%)`, borderRadius: 20, padding: "28px 32px", color: "#fff", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", right: 20, top: 10, fontSize: 80, opacity: 0.1 }}>🌾</div>
-              <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>📅 {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · 📍 {dashLocation}</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 900, marginBottom: 6 }}>
-                Welcome to KisanSaathi 🌾
-
-              </div>
-              <div style={{ fontSize: 14, opacity: 0.85, maxWidth: 500 }}>
-                {t.welcomeMsg}
-              </div>
-              {dashWeather && <div style={{ marginTop: 8, fontSize: 18 }}>📍 {dashWeather.current.temp_c}°C · {dashWeather.current.condition.text}</div>}
-              <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
-                {["🌤️ Check Weather", "📊 Market Prices", "🌱 Crop Tips", "🔬 Disease Check"].map((btn, i) => (
-                  <button key={i} onClick={() => setActiveTab(["weather","market","crops","disease"][i])}
-                    style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 20, padding: "7px 16px", fontSize: 12, color: "#fff", cursor: "pointer", fontWeight: 600, fontFamily: "'Lato', sans-serif" }}>
-                    {btn}
-                  </button>
+            {/* Hero Banner */}
+            <div className="ks-hero" style={{ background:`linear-gradient(135deg, ${theme.leaf} 0%, #2d5a3d 100%)` }}>
+              <div className="ks-hero-watermark">🌾</div>
+              <div className="ks-hero-date">📅 {new Date().toLocaleDateString("en-IN", { weekday:"long", day:"numeric", month:"long", year:"numeric" })} · 📍 {dashLocation}</div>
+              <div className="ks-hero-title">Welcome to KisanSaathi 🌾</div>
+              <div className="ks-hero-desc">{t.welcomeMsg}</div>
+              {dashWeather && <div className="ks-hero-temp">📍 {dashWeather.current.temp_c}°C · {dashWeather.current.condition.text}</div>}
+              <div className="ks-hero-btns">
+                {["🌤️ Check Weather","📊 Market Prices","🌱 Crop Tips","🔬 Disease Check"].map((btn, i) => (
+                  <button key={i} className="ks-hero-btn" onClick={() => setActiveTab(["weather","market","crops","disease"][i])}>{btn}</button>
                 ))}
               </div>
             </div>
 
-           {/* Weather Alert Banner */}
+            {/* Farm Alerts */}
+            {farmAlerts.map((alert, idx) => (
+              <div key={idx} className="ks-alert">⚠️ Farm Alert: {alert}</div>
+            ))}
 
-{farmAlerts.map((alert, index) => (
-  <div
-    key={index}
-    style={{
-      background: "#fff8dc",
-      padding: 12,
-      borderRadius: 12,
-      marginBottom: 10,
-      border: "1px solid #f0d98a"
-    }}
-  >
-    ⚠️ Farm Alert: {alert}
-  </div>
-))}
-            
-
-            {/* Quick Stats */}
+            {/* Today's Overview */}
             <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>📌 {t.todayOverview}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
+              <div className="ks-section-title" style={{ color:theme.soil }}>📌 {t.todayOverview}</div>
+              <div className="ks-stats-grid">
                 {[
-                  { label: t.tempLabel, value: dashWeather ? `${dashWeather.current.temp_c}°C` : `${weatherData.current.temp}°C`, icon: "🌡️", sub: dashWeather ? `${t.feelsLike} ${dashWeather.current.feelslike_c}°C` : `${t.feelsLike} ${weatherData.current.feels}°C`, color: "#e3f2fd", border: "#90caf9" },
-                  { label: t.humidity, value: dashWeather ? `${dashWeather.current.humidity}%` : `${weatherData.current.humidity}%`, icon: "💧", sub: dashWeather ? dashWeather.current.condition.text : t.moderate, color: "#e0f7fa", border: "#80deea" },
-                  { label: t.windSpeed, value: dashWeather ? `${dashWeather.current.wind_kph} km/h` : `${weatherData.current.wind} km/h`, icon: "💨", sub: t.liveData, color: "#f3e5f5", border: "#ce93d8" },
-                
+                  { label:t.tempLabel, value:dashWeather ? `${dashWeather.current.temp_c}°C` : `${weatherData.current.temp}°C`, icon:"🌡️", sub:dashWeather ? `${t.feelsLike} ${dashWeather.current.feelslike_c}°C` : `${t.feelsLike} ${weatherData.current.feels}°C`, color:"#e3f2fd", border:"#90caf9" },
+                  { label:"Humidity", value:dashWeather ? `${dashWeather.current.humidity}%` : `${weatherData.current.humidity}%`, icon:"💧", sub:dashWeather ? dashWeather.current.condition.text : t.moderate, color:"#e0f7fa", border:"#80deea" },
+                  { label:t.windSpeed, value:dashWeather ? `${dashWeather.current.wind_kph} km/h` : `${weatherData.current.wind} km/h`, icon:"💨", sub:t.liveData, color:"#f3e5f5", border:"#ce93d8" },
                 ].map((s, i) => (
-                  <div key={i} className="card-hover" style={{ background: s.color, borderRadius: 16, border: `1.5px solid ${s.border}`, padding: "18px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", cursor: "default" }}>
-                    <div style={{ fontSize: 28, marginBottom: 8 }}>{s.icon}</div>
-                    <div style={{ fontSize: 10, color: theme.muted, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 4, fontWeight: 700 }}>{s.label}</div>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: theme.soil }}>{s.value}</div>
-                    <div style={{ fontSize: 11, color: theme.leaf, marginTop: 4, fontWeight: 600 }}>{s.sub}</div>
+                  <div key={i} className="card-hover ks-stat-card" style={{ background:s.color, borderColor:s.border }}>
+                    <div className="ks-stat-icon">{s.icon}</div>
+                    <div className="ks-stat-label" style={{ color:theme.muted }}>{s.label}</div>
+                    <div className="ks-stat-value" style={{ color:theme.soil }}>{s.value}</div>
+                    <div className="ks-stat-sub" style={{ color:theme.leaf }}>{s.sub}</div>
                   </div>
                 ))}
               </div>
             </div>
-            {/* Smart Farm Insights */}
-        <SmartFarmInsights
-  conditions={conditions}
-  crop={farmProfile.crop}
-  currentStage={
-    getCropStage(
-      farmProfile.crop,
-      farmProfile.sowingDate
-    )?.currentStage
-  }
-/>
 
-            {/* 7-Day Forecast + Crop Stage Tracker */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-              {/* Weather mini / 7-Day Forecast */}
-              <div style={{ background: `linear-gradient(135deg, #1565c0, #42a5f5)`, borderRadius: 18, padding: 22, color: "#fff", boxShadow: "0 4px 20px rgba(21,101,192,0.3)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700 }}>🌤️ {t.forecastLabel}</div>
-                  <div style={{ fontSize: 11, opacity: 0.7, background: "rgba(255,255,255,0.2)", borderRadius: 10, padding: "3px 10px" }}>Live</div>
+            {/* Smart Farm Insights */}
+            <SmartFarmInsights conditions={conditions} crop={farmProfile.crop} currentStage={getCropStage(farmProfile.crop, farmProfile.sowingDate)?.currentStage} />
+
+            {/* 7-Day Forecast + Crop Stage — FIX: align-items:start prevents empty stretch */}
+            <div className="ks-forecast-crop-grid">
+              {/* Forecast Card — height auto, no fixed height */}
+              <div className="ks-forecast-card" style={{ background:"linear-gradient(135deg, #1565c0, #42a5f5)", alignSelf:"start" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
+                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:15, fontWeight:700 }}>🌤️ {t.forecastLabel}</div>
+                  <span style={{ fontSize:11, opacity:.7, background:"rgba(255,255,255,0.2)", borderRadius:10, padding:"3px 10px" }}>Live</span>
                 </div>
-                <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
+                <div className="ks-forecast-scroll">
                   {(dashWeather ? dashWeather.forecast.forecastday : []).map((f, i) => (
-                    <div key={i} style={{ textAlign: "center", minWidth: 52, background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "10px 6px", backdropFilter: "blur(4px)" }}>
-                      <div style={{ fontSize: 10, opacity: 0.8, marginBottom: 6, fontWeight: 700 }}>{new Date(f.date).toLocaleDateString("en-IN", { weekday: "short" })}</div>
-                      <img src={f.day.condition.icon} alt="" style={{ width: 28, height: 28 }} />
-                      <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4 }}>{f.day.maxtemp_c}°</div>
-                      <div style={{ fontSize: 10, opacity: 0.7 }}>{f.day.mintemp_c}°</div>
-                      <div style={{ fontSize: 10, opacity: 0.8, marginTop: 4, background: "rgba(255,255,255,0.2)", borderRadius: 6, padding: "2px 4px" }}>💧{f.day.daily_chance_of_rain}%</div>
+                    <div key={i} className="ks-forecast-day">
+                      <div className="ks-forecast-day-name">{new Date(f.date).toLocaleDateString("en-IN", { weekday:"short" })}</div>
+                      <img src={f.day.condition.icon} alt="" style={{ width:28, height:28, margin:"0 auto" }} />
+                      <div className="ks-forecast-day-high">{f.day.maxtemp_c}°</div>
+                      <div className="ks-forecast-day-low">{f.day.mintemp_c}°</div>
+                      <div className="ks-forecast-day-rain">💧{f.day.daily_chance_of_rain}%</div>
                     </div>
                   ))}
                   {!dashWeather && weatherData.forecast.map((f, i) => (
-                    <div key={i} style={{ textAlign: "center", minWidth: 52, background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "10px 6px" }}>
-                      <div style={{ fontSize: 10, opacity: 0.8, marginBottom: 6, fontWeight: 700 }}>{f.day}</div>
-                      <div style={{ fontSize: 22 }}>{f.icon}</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4 }}>{f.high}°</div>
-                      <div style={{ fontSize: 10, opacity: 0.7 }}>{f.low}°</div>
-                      <div style={{ fontSize: 10, opacity: 0.8, marginTop: 4, background: "rgba(255,255,255,0.2)", borderRadius: 6, padding: "2px 4px" }}>💧{f.rain}%</div>
+                    <div key={i} className="ks-forecast-day">
+                      <div className="ks-forecast-day-name">{f.day}</div>
+                      <div style={{ fontSize:20, textAlign:"center" }}>{f.icon}</div>
+                      <div className="ks-forecast-day-high">{f.high}°</div>
+                      <div className="ks-forecast-day-low">{f.low}°</div>
+                      <div className="ks-forecast-day-rain">💧{f.rain}%</div>
                     </div>
                   ))}
                 </div>
               </div>
-
               {/* Crop Stage Tracker */}
-             <CropStageTracker
-  crop={farmProfile.crop}
-  sowingDate={farmProfile.sowingDate}
-onEdit={() => {
-  console.log("Edit clicked");
-  setShowFarmModal(true);
-}}
-/>
+              <CropStageTracker crop={farmProfile.crop} sowingDate={farmProfile.sowingDate} onEdit={() => setShowFarmModal(true)} />
             </div>
 
             {/* Quick Actions */}
             <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>⚡ {t.quickActions}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
+              <div className="ks-section-title" style={{ color:theme.soil }}>⚡ {t.quickActions}</div>
+              <div className="ks-actions-grid">
                 {[
-                  { icon: "🔬", label: t.disease, tab: "disease", color: "#fce4ec", border: "#f48fb1" },
-                  { icon: "🌱", label: t.crops, tab: "crops", color: "#e8f5e9", border: "#a5d6a7" },
-                  { icon: "🏛️", label: t.schemes, tab: "schemes", color: "#ede7f6", border: "#ce93d8" },
-                  { icon: "🤖", label: t.advisor, tab: "advisor", color: "#e3f2fd", border: "#90caf9" },
-                  { icon: "📈", label: t.market, tab: "market", color: "#fff8e1", border: "#ffe082" },
-                  { icon: "🌤️", label: t.weather, tab: "weather", color: "#e0f7fa", border: "#80deea" },
+                  { icon:"🔬", label:t.disease,  tab:"disease",  color:"#fce4ec", border:"#f48fb1" },
+                  { icon:"🌱", label:t.crops,    tab:"crops",    color:"#e8f5e9", border:"#a5d6a7" },
+                  { icon:"🏛️", label:t.schemes,  tab:"schemes",  color:"#ede7f6", border:"#ce93d8" },
+                  { icon:"🤖", label:t.advisor,  tab:"advisor",  color:"#e3f2fd", border:"#90caf9" },
+                  { icon:"📈", label:t.market,   tab:"market",   color:"#fff8e1", border:"#ffe082" },
+                  { icon:"🌤️", label:t.weather,  tab:"weather",  color:"#e0f7fa", border:"#80deea" },
                 ].map((a, i) => (
-                  <div key={i} className="card-hover" onClick={() => setActiveTab(a.tab)}
-                    style={{ background: a.color, border: `1.5px solid ${a.border}`, borderRadius: 14, padding: "18px 14px", textAlign: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                    <div style={{ fontSize: 30, marginBottom: 8 }}>{a.icon}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: theme.soil, fontFamily: "'Lato', sans-serif" }}>{a.label}</div>
+                  <div key={i} className="card-hover ks-action-card" style={{ background:a.color, borderColor:a.border }}
+                    onClick={() => setActiveTab(a.tab)}>
+                    <div className="ks-action-icon">{a.icon}</div>
+                    <div className="ks-action-label" style={{ color:theme.soil }}>{a.label}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Farm Task Checklist / Today's Tasks */}
+            {/* Farm Task Checklist */}
             <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: theme.soil, marginBottom: 12, fontWeight: 700 }}>✅ {t.todayTasks}</div>
+              <div className="ks-section-title" style={{ color:theme.soil }}>✅ {t.todayTasks}</div>
               <FarmTaskChecklist t={t} />
             </div>
 
@@ -3285,56 +3379,36 @@ onEdit={() => {
           </div>
         )}
 
-        {/* WEATHER TAB */}
-        {activeTab === "weather" && (
-          <WeatherTab t={t} />
-        )}
-           {/* MARKET TAB */}
-        {activeTab === "market" && (
-          <MarketTab t={t} language={language}  authFetch={authFetch}/>
-        )}
- 
-        {/* CROPS TAB */}
-        {activeTab === "crops" && <CropRecommender t={t} language={language} authFetch={authFetch} />}
- 
-        {/* DISEASE TAB */}
-        {activeTab === "disease" && <DiseaseAnalyzer t={t} language={language} authFetch={authFetch} />}
- 
-        {/* SCHEMES TAB */}
-        {activeTab === "schemes" && (
-          <SchemesTab t={t} language={language} authFetch={authFetch}/>
-        )}
- 
-        {/* YIELD PREDICTOR TAB */}
-        {activeTab === "yield" && <YieldPredictor language={language} t={t} authFetch={authFetch}/>}
-
-        {/* SOIL ANALYZER TAB */}
-        {activeTab === "soil" && <SoilAnalyzer language={language} t={t} authFetch={authFetch}/>}
-
-        {/* MANDI FINDER TAB */}
-        {activeTab === "mandi" && <MandiFinder language={language} t={t} authFetch={authFetch}/>}
-
-        {/* SEED CALCULATOR TAB */}
-        {activeTab === "seed" && <SeedCalculator language={language} t={t} authFetch={authFetch}/>}
-
-        {/* AI ADVISOR TAB */}
-        {activeTab === "advisor" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <div style={{ background: "#e8f5e9", border: "1px solid #a5d6a7", borderRadius: 12, padding: "14px 18px", fontSize: 13, color: "#2e7d32" }}>
-              🤖 Ask anything in English, Hindi, Telugu, Tamil or any Indian language. The AI understands you!            </div>
-            <AIAdvisor t={t} language={language} authFetch={authFetch}/>
-            <div style={{ background: theme.card, borderRadius: 14, border: `1px solid ${theme.border}`, padding: 18 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: theme.bark, marginBottom: 10 }}>💬 Try asking:</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {["What should I sow in June on black soil?", "How to treat yellowing rice leaves?", "Best time to sell onions this month?", "Which govt scheme gives free seeds?", "How much water does wheat need?"].map((q, i) => (
-                  <span key={i} style={{ background: "#f0f7f0", border: "1px solid #c8e6c9", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#2e7d32", cursor: "pointer" }}>{q}</span>
+        {/* ══ OTHER TABS ══ */}
+        {activeTab === "weather"  && <WeatherTab t={t} />}
+        {activeTab === "market"   && <MarketTab t={t} language={language} authFetch={authFetch} />}
+        {activeTab === "crops"    && <CropRecommender t={t} language={language} authFetch={authFetch} />}
+        {activeTab === "disease"  && <DiseaseAnalyzer t={t} language={language} authFetch={authFetch} />}
+        {activeTab === "schemes"  && <SchemesTab t={t} language={language} authFetch={authFetch} />}
+        {activeTab === "yield"    && <YieldPredictor language={language} t={t} authFetch={authFetch} />}
+        {activeTab === "soil"     && <SoilAnalyzer language={language} t={t} authFetch={authFetch} />}
+        {activeTab === "mandi"    && <MandiFinder language={language} t={t} authFetch={authFetch} />}
+        {activeTab === "seed"     && <SeedCalculator language={language} t={t} authFetch={authFetch} />}
+        {activeTab === "advisor"  && (
+          <div style={{ display:"flex", flexDirection:"column", gap:18 }}>
+            <div style={{ background:"#e8f5e9", border:"1px solid #a5d6a7", borderRadius:12, padding:"13px 16px", fontSize:13, color:"#2e7d32" }}>
+              🤖 Ask anything in English, Hindi, Telugu, Tamil or any Indian language. The AI understands you!
+            </div>
+            <AIAdvisor t={t} language={language} authFetch={authFetch} />
+            <div style={{ background:theme.card, borderRadius:14, border:`1px solid ${theme.border}`, padding:16 }}>
+              <div style={{ fontSize:13, fontWeight:700, color:theme.bark, marginBottom:10 }}>💬 Try asking:</div>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+                {["What should I sow in June on black soil?","How to treat yellowing rice leaves?","Best time to sell onions this month?","Which govt scheme gives free seeds?","How much water does wheat need?"].map((q,i) => (
+                  <span key={i} style={{ background:"#f0f7f0", border:"1px solid #c8e6c9", borderRadius:20, padding:"6px 13px", fontSize:12, color:"#2e7d32", cursor:"pointer", wordBreak:"break-word" }}>{q}</span>
                 ))}
               </div>
             </div>
           </div>
         )}
+
       </div>
-{activeTab === "admin" && <AdminDashboard />}
+
+      {activeTab === "admin" && <AdminDashboard />}
 
 
  
@@ -3410,16 +3484,10 @@ function AdminDashboard() {
         <p>Manage platform data and users.</p>
       </div>
 
-      <div
-        style={{display: "flex",gap: 20,alignItems: "flex-start"
-        }}
-      >
+      <div className="ks-admin-layout">
 
         {/* Sidebar */}
-        <div
-          style={{ width: 260, background: "#fff", borderRadius: 16, padding: 20, border: "1px solid #ddd", height: "fit-content"
-          }}
-        >
+        <div className="ks-admin-sidebar">
           <h3>🛡️ Admin Menu</h3>
           <button
             onClick={() => setSection("dashboard")}
@@ -3692,7 +3760,7 @@ function NotificationsManagement({
 
   useEffect(() => {
     fetch(
-      "http://localhost:3001/api/notifications"
+      `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/notifications`
     )
       .then(res => res.json())
       .then(data =>
@@ -3704,7 +3772,7 @@ function NotificationsManagement({
   async function addNotification() {
 
     const res = await fetch(
-      "http://localhost:3001/api/admin/notifications",
+      `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/notifications`,
       {
         method: "POST",
         headers: {
@@ -3746,7 +3814,7 @@ function NotificationsManagement({
       return;
 
     await fetch(
-      `http://localhost:3001/api/admin/notifications/${id}`,
+      `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/notifications/${id}`,
       {
         method: "DELETE"
       }
@@ -3869,7 +3937,7 @@ function UsersManagement() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/admin/users")
+    fetch(`${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/users`)
       .then(res => res.json())
       .then(data => setUsers(data))
       .catch(console.error);
@@ -3880,7 +3948,7 @@ function UsersManagement() {
     if (!window.confirm("Delete this user?")) return;
 
     await fetch(
-      `http://localhost:3001/api/admin/users/${id}`,
+      `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/users/${id}`,
       {
         method: "DELETE"
       }
@@ -3998,7 +4066,7 @@ function MarketManagement({
 async function addPrice() {
   try {
     const res = await fetch(
-      "http://localhost:3001/api/admin/market-price",
+      `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/market-price`,
       {
         method: "POST",
         headers: {
@@ -4041,7 +4109,7 @@ async function addPrice() {
 }
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/market-prices?state=Andhra Pradesh")
+    fetch(`${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/market-prices?state=Andhra Pradesh`)
       .then(res => res.json())
       .then(data => setPrices(data))
       .catch(console.error);
@@ -4050,7 +4118,7 @@ async function addPrice() {
   async function savePrice(id, pricePerQtl) {
 
   await fetch(
-    `http://localhost:3001/api/admin/market-price/${id}`,
+    `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/market-price/${id}`,
     {
       method: "PUT",
       headers: {
@@ -4217,7 +4285,7 @@ async function deletePrice(id) {
   if (!window.confirm("Delete this price?")) return;
 
   await fetch(
-    `http://localhost:3001/api/admin/market-price/${id}`,
+    `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/market-price/${id}`,
     {
       method: "DELETE"
     }
@@ -4242,7 +4310,7 @@ const [newCategory, setNewCategory] = useState("");
 
 async function addScheme() {
   const res = await fetch(
-    "http://localhost:3001/api/admin/schemes",
+    `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/schemes`,
     {
       method: "POST",
       headers: {
@@ -4280,7 +4348,7 @@ async function deleteScheme(id) {
   if (!window.confirm("Delete this scheme?")) return;
 
   await fetch(
-    `http://localhost:3001/api/admin/schemes/${id}`,
+    `${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/schemes/${id}`,
     {
       method: "DELETE"
     }
@@ -4297,7 +4365,7 @@ async function deleteScheme(id) {
 }
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/schemes?state=andhra%20pradesh")
+    fetch(`${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/schemes?state=andhra%20pradesh`)
       .then(res => res.json())
       .then(data => setSchemes(data))
       .catch(console.error);
@@ -4419,17 +4487,17 @@ function AdminStats() {
 
   useEffect(() => {
 
-    fetch("http://localhost:3001/api/admin/users")
+    fetch(`${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/admin/users`)
       .then(res => res.json())
       .then(data => setUserCount(data.length))
       .catch(console.error);
 
-    fetch("http://localhost:3001/api/market-prices?state=Andhra Pradesh")
+    fetch(`${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/market-prices?state=Andhra Pradesh`)
       .then(res => res.json())
       .then(data => setMarketCount(data.length))
       .catch(console.error);
 
-    fetch("http://localhost:3001/api/schemes?state=andhra%20pradesh")
+    fetch(`${(process.env.REACT_APP_API_URL||"").replace(/\/$/,"")}/api/schemes?state=andhra%20pradesh`)
       .then(res => res.json())
       .then(data => setSchemeCount(data.length))
       .catch(console.error);
