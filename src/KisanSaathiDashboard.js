@@ -2542,8 +2542,7 @@ const totalCost =
   const { authFetch, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
-  const { t, i18n } = useTranslation();
-  const language = i18n.language || "English";
+ const language = "English";
 
 
   const [dashWeather, setDashWeather] = useState(null);
