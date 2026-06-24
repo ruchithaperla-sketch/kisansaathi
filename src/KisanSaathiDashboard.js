@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "./context/AuthContext";
-import { useTranslation } from "react-i18next";
 import { apiChat, apiAnalyzeImage } from "./utils/api";
 
 const languageNativeName = {
