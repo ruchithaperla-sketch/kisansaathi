@@ -2542,7 +2542,7 @@ const totalCost =
   const { authFetch, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
- const language = "English";
+ const [language, setLanguage] = useState("English");
 
 
   const [dashWeather, setDashWeather] = useState(null);
@@ -2864,7 +2864,7 @@ const conditions = useMemo(
           </div>
           <select 
             value={language}
-            onChange={(e) => i18n.changeLanguage(e.target.value)}
+            onChange={(e) => setLanguage(e.target.value)}
             style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", borderRadius: "8px", padding: "6px 10px", fontSize: "12px", cursor: "pointer", fontWeight: 600, outline: "none", fontFamily: "'Lato', sans-serif" }}
           >
             <option style={{color: "#333"}} value="English">English</option>
