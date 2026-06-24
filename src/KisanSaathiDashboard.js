@@ -2456,9 +2456,9 @@ function MandiFinder({ language, t, authFetch }) {
 
   try {
 
-    const response = await fetch(
-      `http://localhost:3001/api/mandis?state=${encodeURIComponent(state)}`
-    );
+  const response = await fetch(
+  `${process.env.REACT_APP_API_URL}/api/mandis?state=${encodeURIComponent(state)}`
+);
 
     const data = await response.json();
 

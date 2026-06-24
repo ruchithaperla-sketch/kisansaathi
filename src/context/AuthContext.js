@@ -63,20 +63,22 @@ export function AuthProvider({ children }) {
   }, [persistSession]);
 
   const authFetch = useCallback(async (url, options = {}) => {
-   const res = await fetch(`${process.env.REACT_APP_API_URL}${url}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...(options.headers || {}),
-      },
-    });
-    if (res.status === 401 || res.status === 403) {
-      logout();
-      throw new Error("Session expired. Please log in again.");
-    }
-    return res;
-  }, [token, logout]);
+  const res = await fetch(`${process.env.REACT_APP_API_URL}${url}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
+  });
 
+  if (res.status === 401 || res.status === 403) {
+    logout();
+    throw new Error("Session expired. Please log in again.");
+  }
+
+  return res;
+}, [token, logout]);
   return (
     <AuthContext.Provider value={{ user, token, loading, login, register, logout, authFetch, isAuthenticated: !!user }}>
       {children}
