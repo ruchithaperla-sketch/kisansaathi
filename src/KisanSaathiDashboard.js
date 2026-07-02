@@ -3,14 +3,17 @@ import { useAuth } from "./context/AuthContext";
 import { apiChat, apiAnalyzeImage } from "./utils/api";
 
 
-import {
+/*import {
   translations,
   languageNativeName
 } from "./translations";
+ */
+
+import { useLanguage } from "./context/LanguageContext";
 
 
-console.log("translations =", translations);
-console.log("languageNativeName =", languageNativeName);
+
+
 
  
 // ── Palette & theme ──────────────────────────────────────────────
@@ -2541,11 +2544,14 @@ const totalCost =
   const { authFetch, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
+
  {/* const [language, setLanguage] = useState("English");
   const t = translations[language] || translations.English;
   */  }
-const language = "English";
+/*const language = "English";
 const t = translations.English;
+*/
+   const { language, setLanguage, t } = useLanguage();
 
 
   const [dashWeather, setDashWeather] = useState(null);
