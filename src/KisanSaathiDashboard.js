@@ -1036,63 +1036,57 @@ function MarketTab({ t, language, authFetch }) {
   const [tip, setTip] = useState("");
   const [priceAlert, setPriceAlert] = useState({});
   const [lastUpdated, setLastUpdated] = useState("");
-  const stateMultiplier = {
-  "Andhra Pradesh": 1.00,
-  "Telangana": 1.03,
-  "Maharashtra": 1.08,
-  "Punjab": 1.12,
-  "Haryana": 1.10,
-  "Uttar Pradesh": 0.98,
-  "Madhya Pradesh": 0.95,
-  "Rajasthan": 1.05,
-  "Gujarat": 1.07,
-  "Karnataka": 1.04,
-  "Tamil Nadu": 1.09,
-  "Kerala": 1.15,
-  "Bihar": 0.92,
-  "West Bengal": 1.01,
-  "Odisha": 0.97
-};
- 
-function fetchPrices() {
-  setLoading(true);
+  const indianStates = [
+  "Andhra Pradesh",
+  "Telangana",
+  "Maharashtra",
+  "Punjab",
+  "Haryana",
+  "Uttar Pradesh",
+  "Madhya Pradesh",
+  "Rajasthan",
+  "Gujarat",
+  "Karnataka",
+  "Tamil Nadu",
+  "Kerala",
+  "Bihar",
+  "West Bengal",
+  "Odisha"
+];
 
-  const multiplier = stateMultiplier[state] || 1;
+  const getCropName = (crop) => crop;
+  async function fetchPrices() {
+  try {
+    setLoading(true);
 
-  const updatedPrices = marketPrices.map(item => ({
-    ...item,
-    price: Math.round(item.price * multiplier),
-    change: Math.floor(Math.random() * 200) - 50
-  }));
+    const res = await authFetch(
+      `/api/market-prices?state=${encodeURIComponent(state)}`
+    );
 
-  setPrices(updatedPrices);
+    if (!res.ok) {
+      throw new Error("Failed to fetch market prices");
+    }
 
-  setLastUpdated(
-    new Date().toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })
-  );
+    const data = await res.json();
 
-  setTip(
-    `${state}: Market prices updated based on local mandi trends.`
-  );
+    setPrices(
+      data.map(item => ({
+        ...item,
+        change: 0, // temporary until we calculate real changes
+      }))
+    );
 
-  setLoading(false);
+    setLastUpdated(new Date().toLocaleString());
+
+    setTip(`Showing market prices for ${state}.`);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to fetch market prices.");
+  } finally {
+    setLoading(false);
+  }
 }
-  const indianStates = ["Andhra Pradesh","Telangana","Maharashtra","Punjab","Haryana","Uttar Pradesh","Madhya Pradesh","Rajasthan","Gujarat","Karnataka","Tamil Nadu","Kerala","Bihar","West Bengal","Odisha"];
-
-  const cropNames = {
-    English: { Wheat:"Wheat", Rice:"Rice", Tomato:"Tomato", Onion:"Onion", Potato:"Potato", Cotton:"Cotton", Soybean:"Soybean", Maize:"Maize", Groundnut:"Groundnut", Chilli:"Chilli" },
-    Hindi: { Wheat:"गेहूं", Rice:"चावल", Tomato:"टमाटर", Onion:"प्याज", Potato:"आलू", Cotton:"कपास", Soybean:"सोयाबीन", Maize:"मक्का", Groundnut:"मूंगफली", Chilli:"मिर्च" },
-    Telugu: { Wheat:"గోధుమ", Rice:"వరి", Tomato:"టమాటా", Onion:"ఉల్లిపాయ", Potato:"బంగాళాదుంప", Cotton:"పత్తి", Soybean:"సోయాబీన్", Maize:"మొక్కజొన్న", Groundnut:"వేరుశనగ", Chilli:"మిర్చి" },
-    Tamil: { Wheat:"கோதுமை", Rice:"அரிசி", Tomato:"தக்காளி", Onion:"வெங்காயம்", Potato:"உருளைக்கிழங்கு", Cotton:"பருத்தி", Soybean:"சோயாபீன்", Maize:"மக்காச்சோளம்", Groundnut:"வேர்க்கடலை", Chilli:"மிளகாய்" },
-    Kannada: { Wheat:"ಗೋಧಿ", Rice:"ಭತ್ತ", Tomato:"ಟೊಮೇಟೊ", Onion:"ಈರುಳ್ಳಿ", Potato:"ಆಲೂಗಡ್ಡೆ", Cotton:"ಹತ್ತಿ", Soybean:"ಸೋಯಾಬೀನ್", Maize:"ಮೆಕ್ಕೆಜೋಳ", Groundnut:"ಕಡಲೆಕಾಯಿ", Chilli:"ಮೆಣಸಿನಕಾಯಿ" },
-    Marathi: { Wheat:"गहू", Rice:"तांदूळ", Tomato:"टोमॅटो", Onion:"कांदा", Potato:"बटाटा", Cotton:"कापूस", Soybean:"सोयाबीन", Maize:"मका", Groundnut:"भुईमूग", Chilli:"मिरची" },
-    Punjabi: { Wheat:"ਕਣਕ", Rice:"ਚਾਵਲ", Tomato:"ਟਮਾਟਰ", Onion:"ਪਿਆਜ਼", Potato:"ਆਲੂ", Cotton:"ਕਪਾਹ", Soybean:"ਸੋਇਆਬੀਨ", Maize:"ਮੱਕੀ", Groundnut:"ਮੂੰਗਫਲੀ", Chilli:"ਮਿਰਚ" },
-  };
-
-  const getCropName = (crop) => cropNames[language]?.[crop] || crop;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -1138,17 +1132,10 @@ function fetchPrices() {
       color: theme.soil
     }}
   >
-    ₹{(m.price / 100).toFixed(2)}/kg
+    ₹{(m.pricePerQtl / 100).toFixed(2)}/kg
   </div>
 
-  <div
-    style={{
-      fontsize: 11,
-      color: theme.muted
-    }}
-  >
-    ₹{m.price}/qtl
-  </div>
+
 </div></span>
                 <span style={{ textAlign: "right", color: m.change >= 0 ? "#2e7d32" : theme.red, fontWeight: 700, fontSize: 13 }}>
                   {m.change >= 0 ? "▲" : "▼"} {Math.abs(m.change)}
@@ -1206,7 +1193,7 @@ function fetchPrices() {
       color: theme.soil
     }}
   >
-    ₹{(m.price / 100).toFixed(2)}/kg
+    ₹{(m.pricePerQtl / 100).toFixed(2)}/kg
   </div>
 
   <div
@@ -1215,7 +1202,7 @@ function fetchPrices() {
       color: theme.muted
     }}
   >
-    ₹{m.price}/qtl
+    ₹{m.priceperqtl}/qtl
   </div>
 </div></div>
                   <div style={{ fontWeight: 700, fontSize: 13, color: m.change >= 0 ? "#2e7d32" : theme.red, minWidth: 60, textAlign: "right" }}>
