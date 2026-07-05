@@ -1068,6 +1068,8 @@ function MarketTab({ t, language, authFetch }) {
     }
 
     const data = await res.json();
+    console.log("Total records:", data.length);
+    console.log("Data:", data);
 
     setPrices(
       data.map(item => ({
@@ -1087,6 +1089,16 @@ function MarketTab({ t, language, authFetch }) {
     setLoading(false);
   }
 }
+const leaderboard = [...prices]
+  .sort((a, b) => b.pricePerQtl - a.pricePerQtl)
+  .slice(0, 3);
+
+const maxPrice =
+  leaderboard.length > 0
+    ? Math.max(...leaderboard.map(item => item.pricePerQtl))
+    : 1;
+
+const medals = ["🥇", "🥈", "🥉"];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -1117,13 +1129,32 @@ function MarketTab({ t, language, authFetch }) {
           <div style={{ border:`1px solid ${theme.border}`, borderRadius:12, overflow:"hidden", minWidth:460 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 80px", padding: "10px 16px", background: theme.soil, color: "#fff", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
               <span>Crop</span>
-              <span style={{ textAlign: "right" }}>Price (₹/qtl | ₹/kg)</span>
+              <span style={{ textAlign: "right" }}>Price (₹/kg)</span>
               <span style={{ textAlign: "right" }}>Change</span>
               <span style={{ textAlign: "center" }}>Alert</span>
             </div>
             {prices.map((m, i) => (
               <div key={i} style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 80px", padding: "12px 16px", background: i % 2 === 0 ? "#fff" : "#fafaf6", alignItems: "center", borderBottom: `1px solid ${theme.border}` }}>
-                <span style={{ fontWeight: 700, color: theme.soil, fontSize: 14 }}>🌾 {getCropName(m.crop)}</span>
+                <div>
+  <div
+    style={{
+      fontWeight: 700,
+      color: theme.soil,
+      fontSize: 14
+    }}
+  >
+    🌾 {getCropName(m.crop)}
+  </div>
+
+  <div
+    style={{
+      fontSize: 11,
+      color: theme.muted
+    }}
+  >
+    📍 {m.market}
+  </div>
+</div>
                 <span style={{ textAlign: "right", fontWeight: 700, fontSize: 15, color: theme.soil }}><div style={{ textalign: "right" }}>
   <div
     style={{
@@ -1168,21 +1199,31 @@ function MarketTab({ t, language, authFetch }) {
 
       {prices.length > 0 && (
         <div style={{ background: theme.card, borderRadius: 16, border: `1px solid ${theme.border}`, padding: 20 }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 4 }}>🏆 Price Change Leaderboard</div>
-          <div style={{ fontSize: 12, color: theme.muted, marginBottom: 16 }}>{t.priceChangeIn} {state}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: theme.soil, marginBottom: 4 }}>🏆 Top 3 Highest Market Prices</div>
+          <div style={{ fontSize: 12, color: theme.muted, marginBottom: 16 }}>Top 3 crops with the highest prices in {state}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[...prices].sort((a, b) => b.change - a.change).map((m, i) => {
-              const isTop = i < 3;
-              const isBottom = i >= prices.length - 3;
-              const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`;
-              const barWidth = Math.abs(m.change) / Math.max(...prices.map(p => Math.abs(p.change))) * 100;
+            {leaderboard.map((m, i) => {
+              const medal = medals[i];
+
+              const barWidth = (m.pricePerQtl / maxPrice) * 100;
               return (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 10, background: isTop ? "#f0fff4" : isBottom ? "#fff5f5" : "#fafaf6", border: `1px solid ${isTop ? "#a5d6a7" : isBottom ? "#ffcdd2" : theme.border}` }}>
+                <div
+  key={i}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "10px 14px",
+    borderRadius: 10,
+    background: "#f0fff4",
+    border: "1px solid #a5d6a7"
+  }}
+>
                   <div style={{ fontSize: 18, minWidth: 32, textAlign: "center" }}>{medal}</div>
                   <div style={{ fontWeight: 700, color: theme.soil, fontSize: 14, minWidth: 80 }}>🌾 {getCropName(m.crop)}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ height: 8, borderRadius: 4, background: "#eee", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${barWidth}%`, background: m.change >= 0 ? "#4caf50" : "#f44336", borderRadius: 4, transition: "width 0.5s" }} />
+                      <div style={{ height: "100%", width: `${barWidth}%`, background: "#4caf50", borderRadius: 4, transition: "width 0.5s" }} />
                     </div>
                   </div>
                   <div style={{ fontWeight: 700, fontSize: 14, color: theme.soil, minWidth: 70, textAlign: "right" }}><div style={{ textalign: "right" }}>
@@ -1196,25 +1237,16 @@ function MarketTab({ t, language, authFetch }) {
     ₹{(m.pricePerQtl / 100).toFixed(2)}/kg
   </div>
 
-  <div
-    style={{
-      fontsize: 11,
-      color: theme.muted
-    }}
-  >
-    ₹{m.priceperqtl}/qtl
-  </div>
+ 
 </div></div>
-                  <div style={{ fontWeight: 700, fontSize: 13, color: m.change >= 0 ? "#2e7d32" : theme.red, minWidth: 60, textAlign: "right" }}>
-                    {m.change >= 0 ? "▲" : "▼"} ₹{Math.abs(m.change)}
-                  </div>
+                
                 </div>
               );
             })}
           </div>
           <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 12 }}>
-            <span style={{ color: "#2e7d32" }}>{t.topSell}</span>
-            <span style={{ color: theme.red }}>🔴 Bottom 3 = Prices falling
+           <span style={{ color: "#2e7d32" }}>
+  📊 Ranked by highest market price today
 </span>
           </div>
         </div>

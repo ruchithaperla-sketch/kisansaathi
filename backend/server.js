@@ -189,27 +189,52 @@ app.get("/api/auth/me", authenticateToken, async (req, res) => {
   }
 });
 // ── Market Prices ─────────────────────────────
-
 app.get("/api/market-prices", async (req, res) => {
   try {
-
     const state = req.query.state;
 
-    const prices = await MarketPrice.find({ state });
+    const response = await axios.get(
+      "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070",
+      {
+        params: {
+          "api-key": process.env.DATA_GOV_API_KEY,
+          format: "json",
+          limit: 1000
+        }
+      }
+    );
+
+    let records = response.data.records;
+
+    if (state) {
+      records = records.filter(
+        r =>
+          r.state &&
+          r.state.trim().toLowerCase() ===
+            state.trim().toLowerCase()
+      );
+    }
+
+    const prices = records.map(item => ({
+      crop: item.commodity,
+      market: item.market,
+      state: item.state,
+      pricePerQtl: Number(item.modal_price)
+    }));
+
+    console.log("State:", state);
+    console.log("Returned:", prices.length);
 
     res.json(prices);
 
   } catch (err) {
-
-    console.error(err);
+    console.error(err.response?.data || err.message);
 
     res.status(500).json({
       error: "Failed to fetch market prices"
     });
-
   }
 });
-
 // ── Admin Update Market Price ─────────────────────────
 
 app.put("/api/admin/market-price/:id", async (req, res) => {
