@@ -2242,7 +2242,7 @@ function MandiFinder({ language, t, authFetch }) {
 
 function SeedCalculator({ language, t, authFetch }) {
   
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [crop, setCrop] = useState("");
   const [land, setLand] = useState("");
   const [method, setMethod] = useState("Transplanting");
