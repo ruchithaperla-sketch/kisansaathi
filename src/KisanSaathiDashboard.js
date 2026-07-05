@@ -3,11 +3,11 @@ import { useAuth } from "./context/AuthContext";
 import { apiChat, apiAnalyzeImage } from "./utils/api";
 
 
-/*import {
+import {
   translations,
   languageNativeName
 } from "./translations";
- */
+ 
 
 import { useLanguage } from "./context/LanguageContext";
 
@@ -382,7 +382,7 @@ function Sparkline({ data, color }) {
 }
  
 // ── AI Chat Component ────────────────────────────────────────────
-function FarmTaskChecklist({ t = translations.English }) {
+function FarmTaskChecklist({ t }) {
   const defaultTasks = [
     { id: 1, text: "Check soil moisture levels", done: false },
     { id: 2, text: "Inspect crops for disease signs", done: false },
@@ -438,7 +438,7 @@ function FarmTaskChecklist({ t = translations.English }) {
   );
 }
 
-function CropCalendar({ t = translations.English }) {
+function CropCalendar({  t }) {
   const month = new Date().toLocaleString("en-IN", { month: "long" });
   const activities = {
     January: [{ crop: "Wheat", task: "Irrigation & top dressing fertilizer", icon: "🌾" }, { crop: "Mustard", task: "Watch for aphid attack", icon: "🌻" }, { crop: "Potato", task: "Earthing up operation", icon: "🥔" }],
@@ -476,7 +476,7 @@ function CropCalendar({ t = translations.English }) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function HarvestPoll({ t = translations.English }) {
+function HarvestPoll({ t  }) {
   const [voted, setVoted] = useState(null);
   const [votes, setVotes] = useState({ excellent: 142, good: 89, average: 34, poor: 12 });
 
@@ -1364,7 +1364,10 @@ function AIAdvisor({ t, language, authFetch }) {
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
     setLoading(true);
     try {
-      const reply = await apiChat(authFetch, `You are an expert agricultural advisor for Indian farmers. Answer this: ${userMsg}. Please Respond entirely in ${languageNativeName[language]} language. Do not switch to English.`) || "Sorry, I couldn't process that. Please try again.";
+      const reply = await apiChat(
+  authFetch,
+  `You are an expert agricultural advisor for Indian farmers. Answer this: ${userMsg}.`
+);
       setMessages(prev => [...prev, { role: "assistant", text: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", text: "Connection error. Please check your internet and try again." }]);
@@ -2565,10 +2568,10 @@ const totalCost =
   const [loading, setLoading] = useState(false);
 
  {/* const [language, setLanguage] = useState("English");
-  const t = translations[language] || translations.English;
+  const t = translations[language] || t;
   */  }
 /*const language = "English";
-const t = translations.English;
+const t = t;
 */
    const { language, setLanguage, t } = useLanguage();
 
