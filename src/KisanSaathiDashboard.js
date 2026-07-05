@@ -3,10 +3,7 @@ import { useAuth } from "./context/AuthContext";
 import { apiChat, apiAnalyzeImage } from "./utils/api";
 
 
-import {
-  translations,
-  languageNativeName
-} from "./translations";
+import { languageNativeName } from "./translations";
  
 
 import { useLanguage } from "./context/LanguageContext";
@@ -47,16 +44,7 @@ const weatherData = {
   
 };
  
-const marketPrices = [
-  { crop: "Wheat", price: 2215, change: +45, unit: "quintal", trend: [2100, 2130, 2160, 2180, 2215] },
-  { crop: "Rice", price: 3180, change: -20, unit: "quintal", trend: [3250, 3220, 3200, 3190, 3180] },
-  { crop: "Tomato", price: 1840, change: +120, unit: "quintal", trend: [1600, 1680, 1720, 1780, 1840] },
-  { crop: "Onion", price: 1260, change: -80, unit: "quintal", trend: [1400, 1360, 1320, 1290, 1260] },
-  { crop: "Potato", price: 980, change: +30, unit: "quintal", trend: [920, 940, 955, 965, 980] },
-  { crop: "Cotton", price: 6450, change: +200, unit: "quintal", trend: [6100, 6200, 6280, 6380, 6450] },
-  { crop: "Soybean", price: 4320, change: -60, unit: "quintal", trend: [4450, 4410, 4380, 4360, 4320] },
-  { crop: "Maize", price: 1890, change: +15, unit: "quintal", trend: [1850, 1860, 1870, 1878, 1890] },
-];
+
  
 const governmentSchemes = [
   { name: "PM-KISAN", desc: "₹6,000/year direct income support to farmer families in 3 installments.", category: "Income Support", deadline: "Ongoing", eligible: true },
@@ -847,7 +835,7 @@ function SchemesTab({ t, language, authFetch }) {
   const [state, setState] = useState("Andhra Pradesh");
   const [category, setCategory] = useState("All");
   const [aiSchemes, setAiSchemes] = useState([]);
-  const [loading, setLoading] = useState(false);
+ 
   
 
   const [search, setSearch] = useState("");
@@ -1031,7 +1019,7 @@ function SchemesTab({ t, language, authFetch }) {
 function MarketTab({ t, language, authFetch }) {
   
   const [prices, setPrices] = useState([]);
-  const [loading, setLoading] = useState(false);
+  
   const [state, setState] = useState("Andhra Pradesh");
   const [tip, setTip] = useState("");
   const [priceAlert, setPriceAlert] = useState({});
@@ -1260,7 +1248,7 @@ const medals = ["🥇", "🥈", "🥉"];
 function WeatherTab({ t }) {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(false);
+  
   const [error, setError] = useState("");
 
   async function getWeather() {
@@ -1352,7 +1340,7 @@ function AIAdvisor({ t, language, authFetch }) {
     { role: "assistant", text: "Namaste! 🌾 I'm your AI Farm Advisor. Ask me anything!" }
   ]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  
   const bottomRef = useRef(null);
  
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
@@ -1426,7 +1414,7 @@ function AIAdvisor({ t, language, authFetch }) {
 function DiseaseAnalyzer({ t, language, authFetch }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  
   const [selected, setSelected] = useState(null);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -1711,7 +1699,7 @@ function YieldPredictor({ language, t, authFetch }) {
   const [soil, setSoil] = useState("");
   const [season, setSeason] = useState("Kharif");
   const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
+  
 
   async function predict() {
 
@@ -1888,7 +1876,7 @@ function SoilAnalyzer({ language, t, authFetch }) {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  
   const [manualSoil, setManualSoil] = useState("");
   const fileRef = useRef(null);
   const soilKnowledge = {
@@ -2128,7 +2116,7 @@ function MandiFinder({ language, t, authFetch }) {
   
   const [state, setState] = useState("");
   const [mandis, setMandis] = useState([]);
-  const [loading, setLoading] = useState(false);
+  
  async function findMandis() {
 
   if (!state) return;
@@ -2250,7 +2238,6 @@ function SeedCalculator({ language, t, authFetch }) {
   const [land, setLand] = useState("");
   const [method, setMethod] = useState("Transplanting");
   const [result, setResult] = useState("null");
-  const [loading, setLoading] = useState(false);
   const cropData = {
   Rice: {
     seedRate: 20,
@@ -2565,15 +2552,9 @@ const totalCost =
   export default function KisanSaathiDashboard() {
   const { authFetch, logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [loading, setLoading] = useState(false);
 
- {/* const [language, setLanguage] = useState("English");
-  const t = translations[language] || t;
-  */  }
-/*const language = "English";
-const t = t;
-*/
-   const { language, setLanguage, t } = useLanguage();
+const { language, t } = useLanguage();
+   
 
 
   const [dashWeather, setDashWeather] = useState(null);
