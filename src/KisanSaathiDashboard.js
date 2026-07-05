@@ -831,6 +831,7 @@ function FarmProfileCard() {
   );
 }
 function SchemesTab({ t, language, authFetch }) {
+  const [loading, setLoading] = useState(false);
   
   const [state, setState] = useState("Andhra Pradesh");
   const [category, setCategory] = useState("All");
@@ -1017,6 +1018,7 @@ function SchemesTab({ t, language, authFetch }) {
 
 // ── AI Chat Component ────────────────────────────────────────────
 function MarketTab({ t, language, authFetch }) {
+  const [loading, setLoading] = useState(false);
   
   const [prices, setPrices] = useState([]);
   
@@ -1246,6 +1248,7 @@ const medals = ["🥇", "🥈", "🥉"];
 
 
 function WeatherTab({ t }) {
+  const [loading, setLoading] = useState(false);
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
   
@@ -1336,6 +1339,7 @@ function WeatherTab({ t }) {
 
 
 function AIAdvisor({ t, language, authFetch }) {
+  const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Namaste! 🌾 I'm your AI Farm Advisor. Ask me anything!" }
   ]);
@@ -1412,6 +1416,7 @@ function AIAdvisor({ t, language, authFetch }) {
  
 // ── Disease Analyzer ─────────────────────────────────────────────
 function DiseaseAnalyzer({ t, language, authFetch }) {
+  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
   
@@ -1693,6 +1698,7 @@ setAiTips(localTips[crop] || "Local recommendation available.");
 }
  
 function YieldPredictor({ language, t, authFetch }) {
+  const [loading, setLoading] = useState(false);
   
   const [crop, setCrop] = useState("");
   const [land, setLand] = useState("");
@@ -1872,6 +1878,7 @@ Note: These are estimated values based on standard agricultural data.
 }
 
 function SoilAnalyzer({ language, t, authFetch }) {
+  const [loading, setLoading] = useState(false);
   
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -2113,6 +2120,7 @@ setResult({
 }
 
 function MandiFinder({ language, t, authFetch }) {
+  const [loading, setLoading] = useState(false);
   
   const [state, setState] = useState("");
   const [mandis, setMandis] = useState([]);
@@ -2234,6 +2242,7 @@ function MandiFinder({ language, t, authFetch }) {
 
 function SeedCalculator({ language, t, authFetch }) {
   
+  const [loading, setLoading] = useState(false);
   const [crop, setCrop] = useState("");
   const [land, setLand] = useState("");
   const [method, setMethod] = useState("Transplanting");
