@@ -360,8 +360,14 @@ app.post("/api/chat", async (req, res) => {
       "https://api.groq.com/openai/v1/chat/completions",
       {
         model: "openai/gpt-oss-120b",
-        messages: [{ role: "user", content: prompt.trim() }],
-        max_tokens: 300,
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful farm advisor for Indian farmers. Reply in plain, simple text only. Do not use Markdown formatting of any kind. Do not use # or ## headings. Do not use ** bold ** or * italic *. Do not create tables using | characters. Do not use --- separators. Write short plain-text headings without symbols, then use numbered points or simple bullet points (using - or numbers) where useful, with normal line breaks between sections. Always give a complete answer and never stop in the middle of a sentence, list, or section."
+          },
+          { role: "user", content: prompt.trim() }
+        ],
+        max_tokens: 1024,
       },
       { headers: { Authorization: `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" } }
     );
@@ -387,10 +393,10 @@ app.post("/api/analyze-image", async (req, res) => {
           role: "user",
           content: [
             { type: "image_url", image_url: { url: image } },
-            { type: "text", text: `You are a plant pathologist. Analyze this crop/plant image. ${query ? `Farmer says: ${query}.` : ""} Identify: 1) Disease name 2) Cause 3) Severity 4) Treatment 5) Prevention. Be specific for Indian farmers.` }
+            { type: "text", text: `You are a plant pathologist. Analyze this crop/plant image. ${query ? `Farmer says: ${query}.` : ""} Identify: 1) Disease name 2) Cause 3) Severity 4) Treatment 5) Prevention. Be specific for Indian farmers. Reply in plain, simple text only. Do not use Markdown formatting of any kind. Do not use # or ## headings. Do not use ** bold ** or * italic *. Do not create tables using | characters. Do not use --- separators. Write short plain-text headings without symbols, then use numbered points or simple bullet points where useful, with normal line breaks between sections. Give a complete answer and do not stop in the middle of a sentence, list, or section.` }
           ]
         }],
-        max_tokens: 100,
+        max_tokens: 800,
       },
       { headers: { Authorization: `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" } }
     );
@@ -507,4 +513,3 @@ app.listen(process.env.PORT || 3001, () => {
   console.log(`✅ KisanSaathi server running on port ${process.env.PORT || 3001}`);
   console.log(`GROQ KEY LOADED: ${!!GROQ_KEY}`);
 });
-
